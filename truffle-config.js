@@ -28,7 +28,7 @@ module.exports = {
         production: true    // Treats this network as if it was a public net. (default: false)
     },
 
-    "mainnet-ganache": {
+    development: {
         host: "localhost",
         port: 8545,
         network_id: 1,
@@ -93,7 +93,6 @@ module.exports = {
   },
   mocha: {
     timeout: 100000,
-    reporter: 'eth-gas-reporter'
   },
   compilers: {
     solc: {

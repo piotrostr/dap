@@ -8,18 +8,18 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
   using SafeMath for uint;
 
-  uint public totalSupply = 10**6;
+  uint public _totalSupply = 10**6;
 
-  address public marketingWallet;
+  address public _marketingWallet;
 
   constructor() {
-    _mint(owner(), totalSupply);
-    emit Transfer(address(0), owner(), totalSupply);
-    marketingWallet = owner();
+    _mint(owner(), _totalSupply);
+    emit Transfer(address(0), owner(), _totalSupply);
+    _marketingWallet = owner();
   }
 
-  function setMarketingWallet(address newAddress) public onlyOwner returns {
-    marketingWallet = newAddress;
+  function setMarketingWallet(address newAddress) public onlyOwner {
+    _marketingWallet = newAddress;
   }
 
 }
