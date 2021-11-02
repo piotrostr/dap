@@ -46,15 +46,12 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
             uint balanceBefore = address(this).balance;
             uint marketingFee = amount.mul(5).div(100);
             uint liquidityFee = amount.mul(2).div(100);
-            swapTokenForEth(marketingFee);
-            uint marketingFeeEth = (address(this).balance).sub(balanceBefore);
+            swapTokenForEth(marketingFee.add(liquidityFee.div(2)));
+            uint diff = (address(this).balance).sub(balanceBefore);
+            uint marketingFeeEth = diff.mul(5).div(6);
 
             payable(marketingWallet).transfer(marketingFeeEth);
-
-            balanceBefore = address(this).balance;
-            swapTokenForEth(liquidityFee.div(2));
-            uint ethAmount = (address(this).balance).sub(balanceBefore);
-            addLiquidity(liquidityFee.div(2), ethAmount);
+            addLiquidity(liquidityFee.div(2), diff.sub(marketingFeeEth));
 
             uint amountPostFee = amount.sub(marketingFee).sub(liquidityFee);
             super._transfer(from, to, amountPostFee);

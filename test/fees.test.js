@@ -45,16 +45,15 @@ contract('Neko - transfer', async (accounts) => {
 
   it('takes 5% marketing tax', async () => {
     const transferAmount = new BN(web3.utils.toWei('10000', 'ether'))
-    const marketingTax = transferAmount.muln(5).divn(100)
+    const feeAmount = transferAmount.muln(6).divn(100)
     const ethBalanceBeforeTx = await web3.eth.getBalance(neko.address)
     const WETH = await neko.WETH()
     const [nekoIn, ethOut] = await uniswapRouter.methods
       .getAmountsOut(
-        marketingTax,
+        feeAmount,
         [neko.address, WETH]
       )
       .call()
-    await neko.withdraw({ from: owner })  // clear any existing balance
     const balance0 = new BN(
       await web3.eth.getBalance(
         await neko.marketingWallet()
@@ -68,7 +67,10 @@ contract('Neko - transfer', async (accounts) => {
         await neko.marketingWallet()
       )
     )
-    assert.equal(balance1.sub(balance0).toString(), ethOut)
+    assert.equal(
+      balance1.sub(balance0).toString(), 
+      new BN(ethOut).muln(5).divn(6).toString()
+    )
   })
 })
  
