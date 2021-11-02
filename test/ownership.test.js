@@ -12,10 +12,10 @@ contract('Neko', async (accounts) => {
   })
 
   it('sets the marketing wallet address', async () => {
-    const oldAddress = await neko._marketingWallet()
+    const oldAddress = await neko.marketingWallet()
     assert.isFalse(accounts[2] == oldAddress)
     await neko.setMarketingWallet(accounts[2])
-    const newAddress = await neko._marketingWallet()
+    const newAddress = await neko.marketingWallet()
     assert.equal(newAddress, accounts[2])
   })
 
