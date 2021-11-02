@@ -1,21 +1,29 @@
 const Neko = artifacts.require('Neko')
-const UniswapRouter = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
+const UniswapRouter = require(
+  '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
+)
+const UniswapPair = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json')
 
 const { assert } = require('chai')
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 
-contract('Neko', async (accounts) => {
+contract('Neko - transfer', async (accounts) => {
 
   let neko
   let uniswapRouter
   let owner
+  let uniswapPair
 
-  beforeEach(async () => {
+  before(async () => {
     neko = await Neko.deployed()
     owner = await neko.owner()
     uniswapRouter = new web3.eth.Contract(
       UniswapRouter.abi,
       await neko.routerAddress()
+    )
+    uniswapPair = new web3.eth.Contract(
+      UniswapPair.abi,
+      await neko.uniswapV2Pair()
     )
     await web3.eth.sendTransaction({
       from: owner,
@@ -26,11 +34,11 @@ contract('Neko', async (accounts) => {
     await neko.transferFrom(
       owner, 
       neko.address,
-      web3.utils.toWei('100000', 'ether'),
+      web3.utils.toWei('600000', 'ether'),
       { from: owner }
     )
     await neko.addLiquidity(
-      web3.utils.toWei('50000', 'ether'),  // of neko
+      web3.utils.toWei('500000', 'ether'),  // of neko
       web3.utils.toWei('5', 'ether')  // of ether
     )
   })
@@ -46,14 +54,21 @@ contract('Neko', async (accounts) => {
         [neko.address, WETH]
       )
       .call()
-    await neko.withdraw({ from: owner })
-    const balance0 = new BN(await web3.eth.getBalance(await neko.marketingWallet()))
+    await neko.withdraw({ from: owner })  // clear any existing balance
+    const balance0 = new BN(
+      await web3.eth.getBalance(
+        await neko.marketingWallet()
+      )
+    )
     await neko.transferFrom(owner, accounts[1], transferAmount)
     assert.isFalse(accounts[1] == owner)
     await neko.transfer(accounts[2], transferAmount, { from: accounts[1] })
-    const balance1 = new BN(await web3.eth.getBalance(await neko.marketingWallet()))
+    const balance1 = new BN(
+      await web3.eth.getBalance(
+        await neko.marketingWallet()
+      )
+    )
     assert.equal(balance1.sub(balance0).toString(), ethOut)
   })
-
 })
  

@@ -43,10 +43,19 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         if (msg.sender == owner() || msg.sender == routerAddress) {
             super._transfer(from, to, amount);
         } else {
+            uint balanceBefore = address(this).balance;
             uint marketingFee = amount.mul(5).div(100);
             uint liquidityFee = amount.mul(2).div(100);
             swapTokenForEth(marketingFee);
-            payable(marketingWallet).transfer(address(this).balance);
+            uint marketingFeeEth = (address(this).balance).sub(balanceBefore);
+
+            payable(marketingWallet).transfer(marketingFeeEth);
+
+            balanceBefore = address(this).balance;
+            swapTokenForEth(liquidityFee.div(2));
+            uint ethAmount = (address(this).balance).sub(balanceBefore);
+            addLiquidity(liquidityFee.div(2), ethAmount);
+
             uint amountPostFee = amount.sub(marketingFee).sub(liquidityFee);
             super._transfer(from, to, amountPostFee);
         }
@@ -57,8 +66,8 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         uniswapV2Router.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
-            tokenAmount, 
-            ethAmount,  
+            0, 
+            0,  
             msg.sender,  
             block.timestamp
         );
