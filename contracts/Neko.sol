@@ -19,14 +19,15 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
     address public uniswapV2Pair;
     address public WETH;
 
-    IUniswapV2Router02 public uniswapV2Router = IUniswapV2Router02(routerAddress);
+    IUniswapV2Router02 public uniswapV2Router;
     IUniswapV2Factory public factory;
 
     constructor(address _routerAddress) {
-        _mint(owner(), _totalSupply);
-        emit Transfer(address(0), owner(), _totalSupply);
+        _mint(msg.sender, _totalSupply);
+        emit Transfer(address(0), msg.sender, _totalSupply);
         routerAddress = _routerAddress;
-        marketingWallet = owner();
+        marketingWallet = msg.sender;
+        uniswapV2Router = IUniswapV2Router02(routerAddress);
         factory = IUniswapV2Factory(uniswapV2Router.factory());
         WETH = uniswapV2Router.WETH();
         uniswapV2Pair = factory.createPair(address(this), WETH);

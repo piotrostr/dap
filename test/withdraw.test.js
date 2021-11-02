@@ -19,10 +19,13 @@ contract('Neko', async (accounts) => {
     })
     const balance0 = new BN(await web3.eth.getBalance(await neko.owner()))
     await neko.withdraw({ from: await neko.owner() })
-    const balance1 = new BN(await web3.eth.getBalance(owner))
-    assert.isAbove(
+    const balance1 = new BN(await web3.eth.getBalance(await neko.owner()))
+    // for some reason there are no gas fees on ganache,
+    // but withdrawing works that is what counts
+    assert.equal(
       balance1.sub(balance0).toString(), 
-      Number(web3.utils.toWei('0.99', 'ether'))
+      web3.utils.toWei('1', 'ether')
     )
   })
-}
+})
+
