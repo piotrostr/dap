@@ -12,7 +12,7 @@ import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
     using SafeMath for uint;
 
-    uint public _totalSupply = 10**6;
+    uint public _totalSupply = 10**24;
 
     address public marketingWallet;
     address public routerAddress;
@@ -23,10 +23,9 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
     IUniswapV2Factory public factory;
 
     constructor(address _routerAddress) {
-        _mint(msg.sender, _totalSupply);
-        emit Transfer(address(0), msg.sender, _totalSupply);
+        _mint(owner(), _totalSupply);
         routerAddress = _routerAddress;
-        marketingWallet = msg.sender;
+        marketingWallet = owner();
         uniswapV2Router = IUniswapV2Router02(routerAddress);
         factory = IUniswapV2Factory(uniswapV2Router.factory());
         WETH = uniswapV2Router.WETH();
@@ -40,11 +39,17 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
     }
 
     function _transfer(address from, address to, uint amount) internal override {
-        uint marketingFee = amount.mul(5).div(100);
-        uint liquidityFee = amount.mul(2).div(100);
-        super._transfer(from, marketingWallet, marketingFee);
-        uint amountPostFee = amount.sub(marketingFee).sub(liquidityFee);
-        super._transfer(from, to, amountPostFee);
+        // implement a case where one is excluded from fee
+        if (msg.sender == owner() || msg.sender == routerAddress) {
+            super._transfer(from, to, amount);
+        } else {
+            uint marketingFee = amount.mul(5).div(100);
+            uint liquidityFee = amount.mul(2).div(100);
+            swapTokenForEth(marketingFee);
+            payable(marketingWallet).transfer(address(this).balance);
+            uint amountPostFee = amount.sub(marketingFee).sub(liquidityFee);
+            super._transfer(from, to, amountPostFee);
+        }
     }
 
     function addLiquidity(uint tokenAmount, uint ethAmount) public {
@@ -52,9 +57,9 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         uniswapV2Router.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
-            0,  // min amount A
-            0,  // min amount B
-            address(0),  // not sure why addressTo is the zero addie in BabyBAT
+            tokenAmount, 
+            ethAmount,  
+            msg.sender,  
             block.timestamp
         );
     }
@@ -66,7 +71,7 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         uniswapV2Router.swapExactETHForTokens{value: ethAmount}(
             0,
             path,
-            address(this),  // not sure what this is for, might be refunds
+            msg.sender,  // not sure what this is for, might be refunds
             block.timestamp
         );
     }
