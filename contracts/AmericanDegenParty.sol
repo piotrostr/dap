@@ -9,12 +9,15 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 
-contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
+contract AmericanDegenParty is ERC20('AmericanDegenParty', 'ADP'), Ownable {
     using SafeMath for uint;
 
     uint public _totalSupply = 10**24;
 
     address public marketingWallet;
+    address public venueWallet;
+    address public drinksWallet;
+
     address public routerAddress;
     address public uniswapV2Pair;
     address public WETH;
@@ -26,6 +29,8 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         _mint(owner(), _totalSupply);
         routerAddress = _routerAddress;
         marketingWallet = owner();
+        venueWallet = owner();
+        drinksWallet = owner();
         uniswapV2Router = IUniswapV2Router02(routerAddress);
         factory = IUniswapV2Factory(uniswapV2Router.factory());
         WETH = uniswapV2Router.WETH();
@@ -38,22 +43,33 @@ contract Neko is ERC20('NekoNeko', 'NEKO'), Ownable {
         marketingWallet = newAddress;
     }
 
+    function setVenueWallet(address newAddress) public onlyOwner {
+        venueWallet = newAddress;
+    }
+
+    function setDrinksWallet(address newAddress) public onlyOwner {
+        drinksWallet = newAddress;
+    }
+
     function _transfer(address from, address to, uint amount) internal override {
-        // implement a case where one is excluded from fee
         if (msg.sender == owner() || msg.sender == routerAddress) {
             super._transfer(from, to, amount);
         } else {
             uint balanceBefore = address(this).balance;
-            uint marketingFee = amount.mul(5).div(100);
+            uint marketingFee = amount.mul(8).div(100);
+            uint venueFee = amount.mul(9).div(100);
+            uint drinksFee = amount.mul(1).div(100);
             uint liquidityFee = amount.mul(2).div(100);
-            swapTokenForEth(marketingFee.add(liquidityFee.div(2)));
-            uint diff = (address(this).balance).sub(balanceBefore);
-            uint marketingFeeEth = diff.mul(5).div(6);
+            swapTokenForEth(amount.mul(19).div(100));
+            uint ethOut = (address(this).balance).sub(balanceBefore);
 
-            payable(marketingWallet).transfer(marketingFeeEth);
-            addLiquidity(liquidityFee.div(2), diff.sub(marketingFeeEth));
+            payable(marketingWallet).transfer(ethOut.mul(8).div(19));
+            payable(venueWallet).transfer(ethOut.mul(9).div(19));
+            payable(drinksWallet).transfer(ethOut.div(19));
 
-            uint amountPostFee = amount.sub(marketingFee).sub(liquidityFee);
+            addLiquidity(liquidityFee.div(2), ethOut.div(19));
+
+            uint amountPostFee = amount.mul(80).div(100);
             super._transfer(from, to, amountPostFee);
         }
     }
