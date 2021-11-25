@@ -12,6 +12,9 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
   let adp
   let uniswapRouter
   let owner
+  let marketingWallet
+  let venueWallet
+  let drinksWallet
   let uniswapPair
 
   before(async () => {
@@ -41,11 +44,31 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
       web3.utils.toWei('500000', 'ether'),  // of adp
       web3.utils.toWei('5', 'ether')  // of ether
     )
+    marketingWallet = accounts[1]
+    venueWallet = accounts[2]
+    drinksWallet = accounts[3]
   })
 
-  it('takes 5% marketing tax', async () => {
+  it('sets the marketing wallet properly', async () => {
+    await adp.setMarketingWallet(marketingWallet)
+    assert(await adp.marketingWallet().call() == marketingWallet)
+  })
+
+  it('sets the venue wallet properly', async () => {
+    await adp.setVenue(venueWallet)
+    assert(await adp.venueWallet() == venueWallet)
+  })
+
+  it('sets the drinks wallet properly', async () => {
+    await adp.setDrinksWallet(drinksWallet)
+    assert(await adp.drinksWallet() == drinksWallet)
+  })
+  // see if above runs before the ones below, else set in the before block
+
+  it('takes  8% marketing tax', async () => {
+    // TODO all tax
     const transferAmount = new BN(web3.utils.toWei('10000', 'ether'))
-    const feeAmount = transferAmount.muln(6).divn(100)
+    const feeAmount = transferAmount.muln(19).divn(100)
     const ethBalanceBeforeTx = await web3.eth.getBalance(adp.address)
     const WETH = await adp.WETH()
     const [adpIn, ethOut] = await uniswapRouter.methods
