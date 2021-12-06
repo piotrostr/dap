@@ -16,6 +16,7 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
   let venueWallet
   let drinksWallet
   let uniswapPair
+  let initialAdpPrice
 
   before(async () => {
     adp = await AmericanDegenParty.deployed()
@@ -30,7 +31,7 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
     )
     await web3.eth.sendTransaction({
       from: owner,
-      value: web3.utils.toWei('5.01', 'ether'), 
+      value: web3.utils.toWei('50.01', 'ether'), 
       to: adp.address 
     })
     await adp.approve(owner, await adp.totalSupply())
@@ -40,10 +41,13 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
       web3.utils.toWei('600000', 'ether'),
       { from: owner }
     )
+    const adpIn = '500000'
+    const ethIn = '50'
     await adp.addLiquidity(
-      web3.utils.toWei('500000', 'ether'),  // of adp
-      web3.utils.toWei('5', 'ether')  // of ether
+      web3.utils.toWei(adpIn, 'ether'), 
+      web3.utils.toWei(ethIn, 'ether')  
     )
+    initialAdpPrice = ethIn / adpIn
     marketingWallet = accounts[1]
     venueWallet = accounts[2]
     drinksWallet = accounts[3]
@@ -51,11 +55,11 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
 
   it('sets the marketing wallet properly', async () => {
     await adp.setMarketingWallet(marketingWallet)
-    assert(await adp.marketingWallet().call() == marketingWallet)
+    assert(await adp.marketingWallet() == marketingWallet)
   })
 
   it('sets the venue wallet properly', async () => {
-    await adp.setVenue(venueWallet)
+    await adp.setVenueWallet(venueWallet)
     assert(await adp.venueWallet() == venueWallet)
   })
 
@@ -65,7 +69,7 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
   })
   // see if above runs before the ones below, else set in the before block
 
-  it('takes  8% marketing tax', async () => {
+  it('takes all tax properly', async () => {
     // TODO all tax
     const transferAmount = new BN(web3.utils.toWei('10000', 'ether'))
     const feeAmount = transferAmount.muln(19).divn(100)
@@ -77,23 +81,60 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
         [adp.address, WETH]
       )
       .call()
-    const balance0 = new BN(
+    const balanceMarketing0 = new BN(
       await web3.eth.getBalance(
         await adp.marketingWallet()
+      )
+    )
+    const balanceVenue0 = new BN(
+      await web3.eth.getBalance(
+        await adp.venueWallet()
+      )
+    )
+    const balanceDrinks0 = new BN(
+      await web3.eth.getBalance(
+        await adp.drinksWallet()
       )
     )
     await adp.transferFrom(owner, accounts[1], transferAmount)
     assert.isFalse(accounts[1] == owner)
     await adp.transfer(accounts[2], transferAmount, { from: accounts[1] })
-    const balance1 = new BN(
+    const adpAmount = web3.utils.fromWei(transferAmount)
+    const inEth = adpAmount*initialAdpPrice
+    console.log(`transfer amount: ${adpAmount} ADP (~${inEth} ETH)`)
+    const balanceMarketing1 = new BN(
       await web3.eth.getBalance(
         await adp.marketingWallet()
       )
     )
-    assert.equal(
-      balance1.sub(balance0).toString(), 
-      new BN(ethOut).muln(5).divn(6).toString()
+    const balanceVenue1 = new BN(
+      await web3.eth.getBalance(
+        await adp.venueWallet()
+      )
     )
+    const balanceDrinks1 = new BN(
+      await web3.eth.getBalance(
+        await adp.drinksWallet()
+      )
+    )
+    const marketingTax = new BN(ethOut).muln(8).divn(19).toString()
+    assert.equal(
+      balanceMarketing1.sub(balanceMarketing0), 
+      marketingTax
+    )
+    console.log(`marketing tax: ${web3.utils.fromWei(marketingTax)} ETH`)
+    const venueTax = new BN(ethOut).muln(9).divn(19).toString()
+    assert.equal(
+      balanceVenue1.sub(balanceVenue0), 
+      venueTax
+    )
+    console.log(`venue tax: ${web3.utils.fromWei(venueTax)} ETH`)
+    const drinksTax = new BN(ethOut).muln(1).divn(19).toString()
+    assert.equal(
+      balanceDrinks1.sub(balanceDrinks0).toString(), 
+      drinksTax
+    )
+    console.log(`drinks tax: ${web3.utils.fromWei(drinksTax)} ETH`)
   })
 })
  
