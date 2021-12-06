@@ -56,10 +56,6 @@ contract AmericanDegenParty is ERC20('AmericanDegenParty', 'ADP'), Ownable {
             super._transfer(from, to, amount);
         } else {
             uint balanceBefore = address(this).balance;
-            uint marketingFee = amount.mul(8).div(100);
-            uint venueFee = amount.mul(9).div(100);
-            uint drinksFee = amount.mul(1).div(100);
-            uint liquidityFee = amount.mul(2).div(100);
             swapTokenForEth(amount.mul(19).div(100));
             uint ethOut = (address(this).balance).sub(balanceBefore);
 
@@ -67,7 +63,7 @@ contract AmericanDegenParty is ERC20('AmericanDegenParty', 'ADP'), Ownable {
             payable(venueWallet).transfer(ethOut.mul(9).div(19));
             payable(drinksWallet).transfer(ethOut.div(19));
 
-            addLiquidity(liquidityFee.div(2), ethOut.div(19));
+            addLiquidity(amount.div(100), ethOut.div(19));
 
             uint amountPostFee = amount.mul(80).div(100);
             super._transfer(from, to, amountPostFee);
