@@ -1,25 +1,25 @@
-const AmericanDegenParty = artifacts.require('AmericanDegenParty')
+const DegenerateApeParty = artifacts.require('DegenerateApeParty')
 
 const { assert } = require('chai')
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 
-contract('AmericanDegenParty', async (accounts) => {
+contract('DegenerateApeParty', async (accounts) => {
 
-  let adp
+  let dap
   
   beforeEach(async () => {
-    adp = await AmericanDegenParty.deployed()
+    dap = await DegenerateApeParty.deployed()
   })
 
   it('should be able to withdraw eth in the contract', async function() {
     await web3.eth.sendTransaction({
       from: accounts[1], 
-      to: adp.address, 
+      to: dap.address, 
       value: web3.utils.toWei('1', 'ether')
     })
-    const balance0 = new BN(await web3.eth.getBalance(await adp.owner()))
-    await adp.withdraw({ from: await adp.owner() })
-    const balance1 = new BN(await web3.eth.getBalance(await adp.owner()))
+    const balance0 = new BN(await web3.eth.getBalance(await dap.owner()))
+    await dap.withdraw({ from: await dap.owner() })
+    const balance1 = new BN(await web3.eth.getBalance(await dap.owner()))
     // for some reason there are no gas fees on ganache,
     // but withdrawing works that is what counts
     assert.equal(

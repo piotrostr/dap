@@ -1,28 +1,28 @@
-const AmericanDegenParty = artifacts.require('AmericanDegenParty')
+const DegenerateApeParty = artifacts.require('DegenerateApeParty')
 
 const { assert } = require('chai')
 const { expectRevert } = require('@openzeppelin/test-helpers')
 
-contract('AmericanDegenParty', async (accounts) => {
+contract('DegenerateApeParty', async (accounts) => {
 
-  let adp
+  let dap
 
   beforeEach(async () => {
-    adp = await AmericanDegenParty.deployed()
+    dap = await DegenerateApeParty.deployed()
   })
 
   it('sets the marketing wallet address', async () => {
-    const oldAddress = await adp.marketingWallet()
+    const oldAddress = await dap.marketingWallet()
     assert.isFalse(accounts[2] == oldAddress)
-    await adp.setMarketingWallet(accounts[2])
-    const newAddress = await adp.marketingWallet()
+    await dap.setMarketingWallet(accounts[2])
+    const newAddress = await dap.marketingWallet()
     assert.equal(newAddress, accounts[2])
   })
 
   it('only owner can set the marketing wallet', async () => {
-    assert.isFalse(accounts[2] == await adp.owner())
+    assert.isFalse(accounts[2] == await dap.owner())
     await expectRevert(
-      adp.setMarketingWallet(
+      dap.setMarketingWallet(
         accounts[2], 
         { from: accounts[2] }
       ),

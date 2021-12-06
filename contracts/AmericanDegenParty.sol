@@ -9,7 +9,7 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 
-contract AmericanDegenParty is ERC20('AmericanDegenParty', 'ADP'), Ownable {
+contract DegenerateApeParty is ERC20('DegenerateApeParty', 'DAP'), Ownable {
     using SafeMath for uint;
 
     uint public _totalSupply = 10**24;

@@ -1,4 +1,4 @@
-const AmericanDegenParty = artifacts.require('AmericanDegenParty')
+const DegenerateApeParty = artifacts.require('DegenerateApeParty')
 const UniswapRouter = require(
   '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
 )
@@ -7,9 +7,9 @@ const UniswapPair = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json')
 const { assert } = require('chai')
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 
-contract('AmericanDegenParty - transfer', async (accounts) => {
+contract('DegenerateApeParty - transfer', async (accounts) => {
 
-  let adp
+  let dap
   let uniswapRouter
   let owner
   let marketingWallet
@@ -19,53 +19,53 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
   let initialAdpPrice
 
   before(async () => {
-    adp = await AmericanDegenParty.deployed()
-    owner = await adp.owner()
+    dap = await DegenerateApeParty.deployed()
+    owner = await dap.owner()
     uniswapRouter = new web3.eth.Contract(
       UniswapRouter.abi,
-      await adp.routerAddress()
+      await dap.routerAddress()
     )
     uniswapPair = new web3.eth.Contract(
       UniswapPair.abi,
-      await adp.uniswapV2Pair()
+      await dap.uniswapV2Pair()
     )
     await web3.eth.sendTransaction({
       from: owner,
       value: web3.utils.toWei('50.01', 'ether'), 
-      to: adp.address 
+      to: dap.address 
     })
-    await adp.approve(owner, await adp.totalSupply())
-    await adp.transferFrom(
+    await dap.approve(owner, await dap.totalSupply())
+    await dap.transferFrom(
       owner, 
-      adp.address,
+      dap.address,
       web3.utils.toWei('600000', 'ether'),
       { from: owner }
     )
-    const adpIn = '500000'
+    const dapIn = '500000'
     const ethIn = '50'
-    await adp.addLiquidity(
-      web3.utils.toWei(adpIn, 'ether'), 
+    await dap.addLiquidity(
+      web3.utils.toWei(dapIn, 'ether'), 
       web3.utils.toWei(ethIn, 'ether')  
     )
-    initialAdpPrice = ethIn / adpIn
+    initialAdpPrice = ethIn / dapIn
     marketingWallet = accounts[1]
     venueWallet = accounts[2]
     drinksWallet = accounts[3]
   })
 
   it('sets the marketing wallet properly', async () => {
-    await adp.setMarketingWallet(marketingWallet)
-    assert(await adp.marketingWallet() == marketingWallet)
+    await dap.setMarketingWallet(marketingWallet)
+    assert(await dap.marketingWallet() == marketingWallet)
   })
 
   it('sets the venue wallet properly', async () => {
-    await adp.setVenueWallet(venueWallet)
-    assert(await adp.venueWallet() == venueWallet)
+    await dap.setVenueWallet(venueWallet)
+    assert(await dap.venueWallet() == venueWallet)
   })
 
   it('sets the drinks wallet properly', async () => {
-    await adp.setDrinksWallet(drinksWallet)
-    assert(await adp.drinksWallet() == drinksWallet)
+    await dap.setDrinksWallet(drinksWallet)
+    assert(await dap.drinksWallet() == drinksWallet)
   })
   // see if above runs before the ones below, else set in the before block
 
@@ -73,48 +73,48 @@ contract('AmericanDegenParty - transfer', async (accounts) => {
     // TODO all tax
     const transferAmount = new BN(web3.utils.toWei('10000', 'ether'))
     const feeAmount = transferAmount.muln(19).divn(100)
-    const ethBalanceBeforeTx = await web3.eth.getBalance(adp.address)
-    const WETH = await adp.WETH()
-    const [adpIn, ethOut] = await uniswapRouter.methods
+    const ethBalanceBeforeTx = await web3.eth.getBalance(dap.address)
+    const WETH = await dap.WETH()
+    const [dapIn, ethOut] = await uniswapRouter.methods
       .getAmountsOut(
         feeAmount,
-        [adp.address, WETH]
+        [dap.address, WETH]
       )
       .call()
     const balanceMarketing0 = new BN(
       await web3.eth.getBalance(
-        await adp.marketingWallet()
+        await dap.marketingWallet()
       )
     )
     const balanceVenue0 = new BN(
       await web3.eth.getBalance(
-        await adp.venueWallet()
+        await dap.venueWallet()
       )
     )
     const balanceDrinks0 = new BN(
       await web3.eth.getBalance(
-        await adp.drinksWallet()
+        await dap.drinksWallet()
       )
     )
-    await adp.transferFrom(owner, accounts[1], transferAmount)
+    await dap.transferFrom(owner, accounts[1], transferAmount)
     assert.isFalse(accounts[1] == owner)
-    await adp.transfer(accounts[2], transferAmount, { from: accounts[1] })
-    const adpAmount = web3.utils.fromWei(transferAmount)
-    const inEth = adpAmount*initialAdpPrice
-    console.log(`transfer amount: ${adpAmount} ADP (~${inEth} ETH)`)
+    await dap.transfer(accounts[2], transferAmount, { from: accounts[1] })
+    const dapAmount = web3.utils.fromWei(transferAmount)
+    const inEth = dapAmount*initialAdpPrice
+    console.log(`transfer amount: ${dapAmount} DAP (~${inEth} ETH)`)
     const balanceMarketing1 = new BN(
       await web3.eth.getBalance(
-        await adp.marketingWallet()
+        await dap.marketingWallet()
       )
     )
     const balanceVenue1 = new BN(
       await web3.eth.getBalance(
-        await adp.venueWallet()
+        await dap.venueWallet()
       )
     )
     const balanceDrinks1 = new BN(
       await web3.eth.getBalance(
-        await adp.drinksWallet()
+        await dap.drinksWallet()
       )
     )
     const marketingTax = new BN(ethOut).muln(8).divn(19).toString()
