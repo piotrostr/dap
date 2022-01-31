@@ -1,6 +1,8 @@
-.env.json
 node_modules
-build
-.swp
-*.swp
-.swp*
+.env
+coverage
+coverage.json
+typechain
+
+cache
+artifacts

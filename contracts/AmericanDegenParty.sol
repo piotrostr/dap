@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
-import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
-contract DegenerateApeParty is ERC20('DegenerateApeParty', 'DAP'), Ownable {
-    using SafeMath for uint;
+contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
+    using SafeMath for uint256;
 
-    uint public _totalSupply = 10**24;
+    uint256 public _totalSupply = 10**24;
 
     address public marketingWallet;
     address public venueWallet;
@@ -51,13 +51,17 @@ contract DegenerateApeParty is ERC20('DegenerateApeParty', 'DAP'), Ownable {
         drinksWallet = newAddress;
     }
 
-    function _transfer(address from, address to, uint amount) internal override {
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
         if (msg.sender == owner() || msg.sender == routerAddress) {
             super._transfer(from, to, amount);
         } else {
-            uint balanceBefore = address(this).balance;
+            uint256 balanceBefore = address(this).balance;
             swapTokenForEth(amount.mul(19).div(100));
-            uint ethOut = (address(this).balance).sub(balanceBefore);
+            uint256 ethOut = (address(this).balance).sub(balanceBefore);
 
             payable(marketingWallet).transfer(ethOut.mul(8).div(19));
             payable(venueWallet).transfer(ethOut.mul(9).div(19));
@@ -65,52 +69,45 @@ contract DegenerateApeParty is ERC20('DegenerateApeParty', 'DAP'), Ownable {
 
             addLiquidity(amount.div(100), ethOut.div(19));
 
-            uint amountPostFee = amount.mul(80).div(100);
+            uint256 amountPostFee = amount.mul(80).div(100);
             super._transfer(from, to, amountPostFee);
         }
     }
 
-    function addLiquidity(uint tokenAmount, uint ethAmount) public {
+    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) public {
         _approve(address(this), address(uniswapV2Router), tokenAmount);
-        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+        uniswapV2Router.addLiquidityETH{ value: ethAmount }(
             address(this),
             tokenAmount,
-            0, 
-            0,  
-            msg.sender,  
+            0,
+            0,
+            msg.sender,
             block.timestamp
         );
     }
 
-    function swapEthForToken(uint ethAmount) public {
+    function swapEthForToken(uint256 ethAmount) public {
         address[] memory path = new address[](2);
         path[0] = uniswapV2Router.WETH();
         path[1] = address(this);
-        uniswapV2Router.swapExactETHForTokens{value: ethAmount}(
+        uniswapV2Router.swapExactETHForTokens{ value: ethAmount }(
             0,
             path,
-            msg.sender,  // not sure what this is for, might be refunds
+            msg.sender, // not sure what this is for, might be refunds
             block.timestamp
         );
     }
 
-    function swapTokenForEth(uint tokenAmount) public {
+    function swapTokenForEth(uint256 tokenAmount) public {
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
         _approve(address(this), address(uniswapV2Router), tokenAmount);
-        uniswapV2Router.swapExactTokensForETH(
-            tokenAmount,
-            0,
-            path,
-            address(this),
-            block.timestamp
-        );
+        uniswapV2Router.swapExactTokensForETH(tokenAmount, 0, path, address(this), block.timestamp);
     }
 
     function withdraw() public onlyOwner returns (bool) {
-        uint amount = address(this).balance;
+        uint256 amount = address(this).balance;
         return payable(owner()).send(amount);
     }
 }
-
