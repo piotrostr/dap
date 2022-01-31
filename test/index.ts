@@ -5,13 +5,11 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 import {
   DegenerateApeParty,
-  IUniswapV2Pair,
   IUniswapV2Router02,
   IUniswapV2Factory,
 } from "../typechain";
 import UniswapV2RouterAbi from "@uniswap/v2-periphery/build/IUniswapV2Router02.json";
-import UniswapV2PairAbi from "@uniswap/v2-periphery/build/IUniswapV2Pair.json";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 
 const { deployContract, provider } = waffle;
 
@@ -21,7 +19,6 @@ describe("DegenerateApeParty", () => {
   let ownerAcc: SignerWithAddress;
   let contract: DegenerateApeParty;
   let router: IUniswapV2Router02;
-  let pair: IUniswapV2Pair;
   let factory: IUniswapV2Factory;
   let marketingWallet: string;
   let drinksWallet: string;
@@ -43,10 +40,6 @@ describe("DegenerateApeParty", () => {
     router = (await deployContract(ownerAcc, UniswapV2RouterAbi, [
       await contract.routerAddress(),
     ])) as IUniswapV2Router02;
-
-    pair = (await deployContract(ownerAcc, UniswapV2PairAbi, [
-      await contract.uniswapV2Pair(),
-    ])) as IUniswapV2Pair;
 
     const approveTx = await contract.approve(
       owner,
@@ -140,6 +133,29 @@ describe("DegenerateApeParty", () => {
         withdrawReceipt.effectiveGasPrice,
       );
       expect(initialOwnerBalance.sub(gas).add(txValue)).to.equal(ownerBalance);
+    });
+  });
+
+  describe("setting wallets", () => {
+    it("sets the marketing wallet properly", async () => {
+      await contract.setMarketingWallet(marketingWallet);
+      expect(await contract.marketingWallet()).to.equal(marketingWallet);
+    });
+
+    it("sets the venue wallet properly", async () => {
+      await contract.setVenueWallet(venueWallet);
+      expect(await contract.venueWallet()).to.equal(venueWallet);
+    });
+
+    it("sets the drinks wallet properly", async () => {
+      await contract.setDrinksWallet(drinksWallet);
+      expect(await contract.drinksWallet()).to.equal(drinksWallet);
+    });
+  });
+
+  describe("fees", () => {
+    it("takes the marketing fee", () => {
+      console.log(router, factory, initialDapPrice);
     });
   });
 });
