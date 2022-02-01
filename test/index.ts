@@ -14,8 +14,7 @@ const { deployContract, provider } = waffle;
 
 describe("DegenerateApeParty", () => {
   let signers: SignerWithAddress[];
-  let owner: string;
-  let ownerAcc: SignerWithAddress;
+  let owner: SignerWithAddress;
   let contract: DegenerateApeParty;
   let router: IUniswapV2Router02;
   let factory: IUniswapV2Factory;
@@ -26,10 +25,29 @@ describe("DegenerateApeParty", () => {
   let bob: SignerWithAddress;
   let alice: SignerWithAddress;
 
+  // functions to be used throughout the tests
+  const setMarketingWallet = async () => {
+    const set = await contract.setMarketingWallet(marketingWallet);
+    await set.wait();
+    expect(await contract.marketingWallet()).to.equal(marketingWallet);
+  };
+
+  const setVenueWallet = async () => {
+    const set = await contract.setVenueWallet(venueWallet);
+    await set.wait();
+    expect(await contract.venueWallet()).to.equal(venueWallet);
+  };
+
+  const setDrinksWallet = async () => {
+    const set = await contract.setDrinksWallet(drinksWallet);
+    await set.wait();
+    expect(await contract.drinksWallet()).to.equal(drinksWallet);
+  };
+
   const setupRouter = async () => {
     const ethIn = parseEther("5");
-    const ethTransferTx = await ownerAcc.sendTransaction({
-      from: owner,
+    const ethTransferTx = await owner.sendTransaction({
+      from: owner.address,
       to: contract.address,
       value: ethIn,
     });
@@ -37,7 +55,7 @@ describe("DegenerateApeParty", () => {
 
     const dapIn = parseEther("50000");
     const dapTransferTx = await contract.transferFrom(
-      owner,
+      owner.address,
       contract.address,
       dapIn,
     );
@@ -51,10 +69,9 @@ describe("DegenerateApeParty", () => {
 
   before(async () => {
     signers = await ethers.getSigners();
-    ownerAcc = signers[0];
+    owner = signers[0];
     bob = signers[5];
     alice = signers[6];
-    owner = await ownerAcc.getAddress();
     marketingWallet = await signers[1].getAddress();
     venueWallet = await signers[2].getAddress();
     drinksWallet = await signers[3].getAddress();
@@ -67,27 +84,23 @@ describe("DegenerateApeParty", () => {
     const factoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     factory = await ethers.getContractAt("IUniswapV2Factory", factoryAddress);
 
-    contract = (await deployContract(ownerAcc, DegeneratePartyAbi, [
+    contract = (await deployContract(owner, DegeneratePartyAbi, [
       routerAddress,
     ])) as DegenerateApeParty;
     expect(router.address).to.equal(
       "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
     );
     const pair = await factory.getPair(contract.address, await contract.WETH());
+    const approval = await contract.approve(
+      owner.address,
+      await contract.totalSupply(),
+    );
+    await approval.wait();
     expect(pair).not.to.be.null;
     expect(initialDapPrice).not.to.be.null;
-
-    const approveOwnerTx = await contract.approve(
-      owner,
+    expect(await contract.allowance(owner.address, owner.address)).to.equal(
       await contract.totalSupply(),
     );
-    await approveOwnerTx.wait();
-
-    const approveBobTx = await contract.approve(
-      bob.address,
-      await contract.totalSupply(),
-    );
-    await approveBobTx.wait();
   });
 
   describe("constants", () => {
@@ -120,7 +133,7 @@ describe("DegenerateApeParty", () => {
     it("should be able to transfer ownership", async () => {
       let contractOwner: string;
       contractOwner = await contract.owner();
-      expect(contractOwner).to.equal(owner);
+      expect(contractOwner).to.equal(owner.address);
       const newOwner = signers[1].address;
       const changeOwnershipTx = await contract.transferOwnership(newOwner);
       await changeOwnershipTx.wait();
@@ -132,8 +145,8 @@ describe("DegenerateApeParty", () => {
   describe("payable", () => {
     it("contract should be able to receive eth", async () => {
       const txValue = ethers.utils.parseEther("3");
-      const tx = await ownerAcc.sendTransaction({
-        from: owner,
+      const tx = await owner.sendTransaction({
+        from: owner.address,
         to: contract.address,
         value: txValue,
       });
@@ -143,7 +156,7 @@ describe("DegenerateApeParty", () => {
 
     it("owner should be able to withdraw eth from contract", async () => {
       const txValue = ethers.utils.parseEther("3");
-      const tx = await ownerAcc.sendTransaction({
+      const tx = await owner.sendTransaction({
         to: contract.address,
         value: txValue,
       });
@@ -151,10 +164,10 @@ describe("DegenerateApeParty", () => {
       const contractBalance = await provider.getBalance(contract.address);
       expect(contractBalance).to.equal(txValue);
 
-      const initialOwnerBalance = await provider.getBalance(owner);
+      const initialOwnerBalance = await provider.getBalance(owner.address);
       const withdrawTx = await contract.withdraw();
       const withdrawReceipt = await withdrawTx.wait();
-      const ownerBalance = await provider.getBalance(owner);
+      const ownerBalance = await provider.getBalance(owner.address);
       const gas = withdrawReceipt.gasUsed.mul(
         withdrawReceipt.effectiveGasPrice,
       );
@@ -164,18 +177,15 @@ describe("DegenerateApeParty", () => {
 
   describe("setting wallets", () => {
     it("sets the marketing wallet properly", async () => {
-      await contract.setMarketingWallet(marketingWallet);
-      expect(await contract.marketingWallet()).to.equal(marketingWallet);
+      await setMarketingWallet();
     });
 
     it("sets the venue wallet properly", async () => {
-      await contract.setVenueWallet(venueWallet);
-      expect(await contract.venueWallet()).to.equal(venueWallet);
+      await setVenueWallet();
     });
 
     it("sets the drinks wallet properly", async () => {
-      await contract.setDrinksWallet(drinksWallet);
-      expect(await contract.drinksWallet()).to.equal(drinksWallet);
+      await setDrinksWallet();
     });
   });
 
@@ -184,32 +194,66 @@ describe("DegenerateApeParty", () => {
       await setupRouter();
     });
 
-    it("takes the marketing fee", async () => {
+    it("owner is excluded from the fees", async () => {
+      await setMarketingWallet();
       const amount = parseEther("2");
-      // const feeAmount = amount.mul(19).div(100);
-      // const marketingFee = amount.mul(8).div(19);
-
-      const dapTransferTx = await contract.transferFrom(
-        owner,
-        bob.address,
-        amount,
-      );
-      dapTransferTx.wait();
 
       const marketingBalance0 = await provider.getBalance(marketingWallet);
 
-      const transferTxRequest = await contract.populateTransaction.transferFrom(
+      const transfer = await contract.transferFrom(
+        owner.address,
         bob.address,
-        alice.address,
         amount,
       );
-      // this way of sending tx may not be right, check how to populate and then sign
+      transfer.wait();
 
-      const tx = await bob.sendTransaction(transferTxRequest);
-      console.log(tx);
-      await tx.wait();
+      expect(await contract.balanceOf(bob.address)).to.equal(amount);
       const marketingBalance1 = await provider.getBalance(marketingWallet);
-      expect(marketingBalance1.gt(marketingBalance0)).to.be.true;
+
+      expect(marketingBalance1.eq(marketingBalance0));
     });
+
+    it("takes the marketing fees", async () => {
+      await setMarketingWallet();
+      const amount = parseEther("2");
+
+      await owner.sendTransaction({
+        from: owner.address,
+        to: contract.address,
+        value: amount,
+      });
+
+      expect(await provider.getBalance(contract.address)).to.eq(amount);
+
+      const transferToBob = await contract.transferFrom(
+        owner.address,
+        bob.address,
+        amount,
+      );
+      transferToBob.wait();
+
+      expect(await contract.balanceOf(bob.address)).to.equal(amount);
+
+      contract = contract.connect(bob);
+      await (
+        await contract.approve(bob.address, await contract.totalSupply())
+      ).wait();
+
+      const marketingBalance0 = await provider.getBalance(marketingWallet);
+
+      const transferWithFee = await contract.transfer(alice.address, amount, {
+        from: bob.address,
+      });
+      /*
+      await transferWithFee.wait();
+
+      const marketingBalance1 = await provider.getBalance(marketingWallet);
+
+      expect(marketingBalance1.gt(marketingBalance0)).to.be.true;
+      */
+    });
+
+    // const feeAmount = amount.mul(19).div(100);
+    // const marketingFee = amount.mul(8).div(19);
   });
 });

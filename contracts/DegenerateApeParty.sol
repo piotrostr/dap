@@ -9,6 +9,8 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
+import "hardhat/console.sol";
+
 contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
 
@@ -103,6 +105,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
         _approve(address(this), address(uniswapV2Router), tokenAmount);
+        console.log("%s", uniswapV2Pair);
         uniswapV2Router.swapExactTokensForETH(tokenAmount, 0, path, address(this), block.timestamp);
     }
 
