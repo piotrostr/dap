@@ -7,6 +7,8 @@ import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-tracer";
+import "hardhat-abi-exporter";
 
 import { task } from "hardhat/config";
 
@@ -59,6 +61,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY,
+  },
+  abiExporter: {
+    path: "./artifacts/abi",
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    spacing: 2,
+    pretty: true,
   },
 };
 
