@@ -8,7 +8,6 @@ import {
   IUniswapV2Router02,
   IUniswapV2Factory,
 } from "../typechain";
-import UniswapV2RouterAbi from "@uniswap/v2-periphery/build/IUniswapV2Router02.json";
 import { parseEther } from "ethers/lib/utils";
 
 const { deployContract, provider } = waffle;
@@ -25,45 +24,51 @@ describe("DegenerateApeParty", () => {
   let venueWallet: string;
   let initialDapPrice: BigNumber;
 
-  before(async () => {
-    signers = await ethers.getSigners();
-    ownerAcc = signers[0];
-    owner = await ownerAcc.getAddress();
-  });
-
-  beforeEach(async () => {
-    contract = (await deployContract(
-      ownerAcc,
-      DegeneratePartyAbi,
-    )) as DegenerateApeParty;
-
-    router = (await deployContract(ownerAcc, UniswapV2RouterAbi, [
-      await contract.routerAddress(),
-    ])) as IUniswapV2Router02;
-
+  const setupRouter = async () => {
     const approveTx = await contract.approve(
       owner,
       await contract.totalSupply(),
     );
     await approveTx.wait();
 
-    const dapIn = parseEther("50000");
     const ethIn = parseEther("5");
+    const ethTransferTx = await ownerAcc.sendTransaction({
+      from: owner,
+      to: contract.address,
+      value: ethIn,
+    });
+    await ethTransferTx.wait();
 
-    const transferTx = await contract.transferFrom(
+    const dapIn = parseEther("50000");
+    const dapTransferTx = await contract.transferFrom(
       owner,
       contract.address,
       dapIn,
     );
-    await transferTx.wait();
+    await dapTransferTx.wait();
 
     const addLiqTx = await contract.addLiquidity(dapIn, ethIn);
     await addLiqTx.wait();
 
     initialDapPrice = ethIn.div(dapIn);
+  };
+
+  before(async () => {
+    signers = await ethers.getSigners();
+    ownerAcc = signers[0];
+    owner = await ownerAcc.getAddress();
     marketingWallet = await signers[1].getAddress();
     venueWallet = await signers[2].getAddress();
     drinksWallet = await signers[3].getAddress();
+  });
+
+  beforeEach(async () => {
+    const routerAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+    router = await ethers.getContractAt("IUniswapV2Router02", routerAddress);
+
+    contract = (await deployContract(ownerAcc, DegeneratePartyAbi, [
+      routerAddress,
+    ])) as DegenerateApeParty;
   });
 
   describe("constants", () => {
@@ -77,9 +82,11 @@ describe("DegenerateApeParty", () => {
       expect(symbol).to.equal("DAP");
     });
 
-    it("should have total supply of TODO", async () => {
-      const total = await contract.totalSupply();
-      expect(total).to.equal(null);
+    it("should have total supply of one million", async () => {
+      const oneMillion = BigNumber.from(10).pow(
+        6 + (await contract.decimals()),
+      );
+      expect(await contract.totalSupply()).to.equal(oneMillion);
     });
   });
 
@@ -154,8 +161,14 @@ describe("DegenerateApeParty", () => {
   });
 
   describe("fees", () => {
-    it("takes the marketing fee", () => {
-      console.log(router, factory, initialDapPrice);
+    it("takes the marketing fee", async () => {
+      await setupRouter();
+      expect(router.address).to.equal(
+        "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      );
+      expect(factory.getPair(contract.address, await contract.WETH())).not.to.be
+        .null;
+      expect(initialDapPrice).not.to.be.null;
     });
   });
 });
