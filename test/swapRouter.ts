@@ -14,6 +14,7 @@ describe("SwapExamples", () => {
   let owner: SignerWithAddress;
   let weth: any;
   let dai: any;
+  let uni: any;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -24,6 +25,7 @@ describe("SwapExamples", () => {
     const hre = require("hardhat");
     weth = await hre.ethers.getVerifiedContractAt(await contract.WETH9());
     dai = await hre.ethers.getVerifiedContractAt(await contract.DAI());
+    uni = await hre.ethers.getVerifiedContractAt(await contract.UNI());
   });
 
   describe("swaps", () => {
@@ -41,10 +43,18 @@ describe("SwapExamples", () => {
       const approval = await weth.approve(contract.address, amount);
       await approval.wait();
 
-      const output = await contract.callStatic.swapExactInputSingle(amount);
-      const swap = await contract.swapExactInputSingle(amount);
+      const output = await contract.callStatic.swapExactInputSingle(
+        amount,
+        weth.address,
+        uni.address,
+      );
+      const swap = await contract.swapExactInputSingle(
+        amount,
+        weth.address,
+        uni.address,
+      );
       await swap.wait();
-      expect(await dai.balanceOf(owner.address)).to.eq(output);
+      expect(await uni.balanceOf(owner.address)).to.eq(output);
     });
   });
 });
