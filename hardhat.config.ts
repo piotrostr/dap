@@ -9,6 +9,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
 import "hardhat-abi-exporter";
+import "hardhat-etherscan-abi";
 
 import { task } from "hardhat/config";
 
@@ -48,10 +49,12 @@ const config: HardhatUserConfig = {
       chainId: 4,
     },
     hardhat: {
+      accounts,
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
         blockNumber: 14116985,
       },
+      chainId: 1,
     },
   },
   gasReporter: {
