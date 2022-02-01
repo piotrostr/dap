@@ -23,14 +23,10 @@ describe("DegenerateApeParty", () => {
   let drinksWallet: string;
   let venueWallet: string;
   let initialDapPrice: BigNumber;
+  let bob: SignerWithAddress;
+  let alice: SignerWithAddress;
 
   const setupRouter = async () => {
-    const approveTx = await contract.approve(
-      owner,
-      await contract.totalSupply(),
-    );
-    await approveTx.wait();
-
     const ethIn = parseEther("5");
     const ethTransferTx = await ownerAcc.sendTransaction({
       from: owner,
@@ -56,6 +52,8 @@ describe("DegenerateApeParty", () => {
   before(async () => {
     signers = await ethers.getSigners();
     ownerAcc = signers[0];
+    bob = signers[5];
+    alice = signers[6];
     owner = await ownerAcc.getAddress();
     marketingWallet = await signers[1].getAddress();
     venueWallet = await signers[2].getAddress();
@@ -66,9 +64,30 @@ describe("DegenerateApeParty", () => {
     const routerAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
     router = await ethers.getContractAt("IUniswapV2Router02", routerAddress);
 
+    const factoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    factory = await ethers.getContractAt("IUniswapV2Factory", factoryAddress);
+
     contract = (await deployContract(ownerAcc, DegeneratePartyAbi, [
       routerAddress,
     ])) as DegenerateApeParty;
+    expect(router.address).to.equal(
+      "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    );
+    const pair = await factory.getPair(contract.address, await contract.WETH());
+    expect(pair).not.to.be.null;
+    expect(initialDapPrice).not.to.be.null;
+
+    const approveOwnerTx = await contract.approve(
+      owner,
+      await contract.totalSupply(),
+    );
+    await approveOwnerTx.wait();
+
+    const approveBobTx = await contract.approve(
+      bob.address,
+      await contract.totalSupply(),
+    );
+    await approveBobTx.wait();
   });
 
   describe("constants", () => {
@@ -161,14 +180,36 @@ describe("DegenerateApeParty", () => {
   });
 
   describe("fees", () => {
-    it("takes the marketing fee", async () => {
+    beforeEach(async () => {
       await setupRouter();
-      expect(router.address).to.equal(
-        "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    });
+
+    it("takes the marketing fee", async () => {
+      const amount = parseEther("2");
+      // const feeAmount = amount.mul(19).div(100);
+      // const marketingFee = amount.mul(8).div(19);
+
+      const dapTransferTx = await contract.transferFrom(
+        owner,
+        bob.address,
+        amount,
       );
-      expect(factory.getPair(contract.address, await contract.WETH())).not.to.be
-        .null;
-      expect(initialDapPrice).not.to.be.null;
+      dapTransferTx.wait();
+
+      const marketingBalance0 = await provider.getBalance(marketingWallet);
+
+      const transferTxRequest = await contract.populateTransaction.transferFrom(
+        bob.address,
+        alice.address,
+        amount,
+      );
+      // this way of sending tx may not be right, check how to populate and then sign
+
+      const tx = await bob.sendTransaction(transferTxRequest);
+      console.log(tx);
+      await tx.wait();
+      const marketingBalance1 = await provider.getBalance(marketingWallet);
+      expect(marketingBalance1.gt(marketingBalance0)).to.be.true;
     });
   });
 });
