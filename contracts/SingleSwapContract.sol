@@ -36,13 +36,13 @@ contract SwapExamples {
         address tokenOut
     ) public returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(
-            address(weth),
+            address(tokenIn),
             msg.sender,
             address(this),
             amountIn
         );
         TransferHelper.safeApprove(
-            address(weth),
+            address(tokenIn),
             address(swapRouter),
             amountIn
         );

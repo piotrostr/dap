@@ -169,12 +169,21 @@ describe("DegenerateApeParty", () => {
     });
   });
 
+  describe("adds liquidity", () => {});
+
   describe("swapping", () => {
     it("swaps dap for eth", async () => {
-      await sendDapAndEthToContract();
-      await expect(
-        contract.swapTokenForEth(parseEther("2000")),
-      ).to.revertedWith("only the contract can call this method");
+      const approval = await contract.approve(
+        contract.address,
+        await contract.balanceOf(owner.address),
+      );
+      await approval.wait();
+
+      // for this swap to go through liquidity has to be in the lp
+      const output = await contract.swapTokenForEth(parseEther("2000"));
+      const swap = await contract.swapTokenForEth(parseEther("2000"));
+      console.log(output);
+      await swap.wait();
     });
   });
 

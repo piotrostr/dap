@@ -80,13 +80,13 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         address tokenOut
     ) public returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(
-            address(weth),
+            address(tokenIn),
             msg.sender,
             address(this),
             amountIn
         );
         TransferHelper.safeApprove(
-            address(weth),
+            address(tokenIn),
             address(swapRouter),
             amountIn
         );
@@ -111,18 +111,9 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         public
         returns (uint256 amountOut)
     {
-        // this should be internal but I wanna test it to
-        // get that sweet 100% coverage
-        // dunno how though
-        console.log(msg.sender);
-        console.log(address(this));
-        require(
-            msg.sender == address(this),
-            "only the contract can call this method"
-        );
         amountOut = swapExactInputSingle(
             tokenAmount,
-            address(this),
+            msg.sender,
             address(weth)
         );
         weth.withdraw(amountOut);
