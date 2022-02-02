@@ -89,6 +89,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
             uint256 liquidity
         )
     {
+        _approve(address(this), address(router), totalSupply());
         (amountToken, amountETH, liquidity) = router.addLiquidityETH{
             value: _amountETH
         }(

@@ -62,10 +62,13 @@ const config: HardhatUserConfig = {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`,
       chainId: 4,
     },
+    // there are pretty much no providers with free archive data for bsc
+    // TODO might just go on eth for tests not to take ages
     hardhat: {
       accounts,
       forking: {
-        url: "https://bsc-dataseed.binance.org/",
+        url: `https://speedy-nodes-nyc.moralis.io/a5266ab0f2eab352335a9a3f/bsc/mainnet/archive`,
+        blockNumber: 14915072,
       },
       chainId: 56,
     },
