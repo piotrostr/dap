@@ -5,6 +5,8 @@ pragma abicoder v2;
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
+import "./interfaces/IWETH.sol";
+
 contract SwapExamples {
     // For the scope of these swap examples,
     // we will detail the design considerations when using
@@ -14,6 +16,7 @@ contract SwapExamples {
     // More advanced example contracts will detail how to inherit the swap router safely.
 
     ISwapRouter public immutable swapRouter;
+    IWETH public immutable weth;
 
     address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -22,22 +25,27 @@ contract SwapExamples {
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
-    constructor(ISwapRouter _swapRouter) {
+    constructor(ISwapRouter _swapRouter, IWETH _weth) {
         swapRouter = _swapRouter;
+        weth = _weth;
     }
 
     function swapExactInputSingle(
         uint256 amountIn,
         address tokenIn,
         address tokenOut
-    ) external returns (uint256 amountOut) {
+    ) public returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(
-            WETH9,
+            address(weth),
             msg.sender,
             address(this),
             amountIn
         );
-        TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
+        TransferHelper.safeApprove(
+            address(weth),
+            address(swapRouter),
+            amountIn
+        );
 
         // TODO use oracle to ensure there are no goofy txs
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter

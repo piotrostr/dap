@@ -22,7 +22,6 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     address public routerAddress;
 
     uint24 public constant poolFee = 2500;
-    address public constant WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     ISwapRouter public immutable swapRouter;
     IWETH public immutable weth;
@@ -81,12 +80,16 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         address tokenOut
     ) public returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(
-            WETH9,
+            address(weth),
             msg.sender,
             address(this),
             amountIn
         );
-        TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
+        TransferHelper.safeApprove(
+            address(weth),
+            address(swapRouter),
+            amountIn
+        );
 
         // TODO use oracle to ensure there are no goofy txs
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
@@ -108,11 +111,15 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         public
         returns (uint256 amountOut)
     {
-        // this could be internal but I wanna test it to
+        // this should be internal but I wanna test it to
         // get that sweet 100% coverage
+        // dunno how though
         console.log(msg.sender);
         console.log(address(this));
-        require(msg.sender == address(this));
+        require(
+            msg.sender == address(this),
+            "only the contract can call this method"
+        );
         amountOut = swapExactInputSingle(
             tokenAmount,
             address(this),

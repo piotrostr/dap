@@ -6,6 +6,7 @@ import SwapExamplesAbi from "../artifacts/contracts/SingleSwapContract.sol/SwapE
 import { parseEther } from "ethers/lib/utils";
 
 const routerAddressV3 = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
+const wethAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
 const { deployContract } = waffle;
 
@@ -20,9 +21,10 @@ describe("SwapExamples", () => {
     owner = signers[0];
     contract = (await deployContract(owner, SwapExamplesAbi, [
       routerAddressV3,
+      wethAddress,
     ])) as SwapExamples;
     const hre = require("hardhat");
-    weth = await hre.ethers.getVerifiedContractAt(await contract.WETH9());
+    weth = await hre.ethers.getVerifiedContractAt(wethAddress);
     uni = await hre.ethers.getVerifiedContractAt(await contract.UNI());
   });
 
