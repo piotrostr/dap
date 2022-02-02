@@ -10,6 +10,7 @@ import "solidity-coverage";
 import "hardhat-tracer";
 import "hardhat-abi-exporter";
 import "hardhat-etherscan-abi";
+import "hardhat-change-network";
 
 import { task } from "hardhat/config";
 
@@ -26,18 +27,32 @@ const accounts = { mnemonic: process?.env?.MNEMONIC };
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.7",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 1000,
+    compilers: [
+      {
+        version: "0.8.7",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
       },
-    },
+      {
+        version: "0.6.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
+    ],
   },
   typechain: {
     outDir: "./typechain",
     target: "ethers-v5",
   },
+  defaultNetwork: "localhost",
   networks: {
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
@@ -48,13 +63,13 @@ const config: HardhatUserConfig = {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`,
       chainId: 4,
     },
-    hardhat: {
+    bsc: {
       accounts,
-      forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-        blockNumber: 14116985,
-      },
-      chainId: 1,
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+    },
+    localhost: {
+      url: "http://localhost:8545",
     },
   },
   gasReporter: {

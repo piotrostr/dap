@@ -5,12 +5,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-
-import "./interfaces/IWETH.sol";
-
 import "hardhat/console.sol";
+
+interface IUniswapV2Router {
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts);
+}
 
 contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
@@ -23,16 +28,14 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
 
     uint24 public constant poolFee = 2500;
 
-    ISwapRouter public immutable swapRouter;
-    IWETH public immutable weth;
+    IUniswapV2Router public immutable router;
 
-    constructor(ISwapRouter _swapRouter, IWETH _weth) {
-        swapRouter = _swapRouter;
+    constructor(IUniswapV2Router _router) {
+        router = _router;
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
         venueWallet = owner();
         drinksWallet = owner();
-        weth = _weth;
     }
 
     receive() external payable {}
@@ -74,49 +77,11 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         // TODO
     }
 
-    function swapExactInputSingle(
-        uint256 amountIn,
-        address tokenIn,
-        address tokenOut
-    ) public returns (uint256 amountOut) {
-        TransferHelper.safeTransferFrom(
-            address(tokenIn),
-            msg.sender,
-            address(this),
-            amountIn
-        );
-        TransferHelper.safeApprove(
-            address(tokenIn),
-            address(swapRouter),
-            amountIn
-        );
-
-        // TODO use oracle to ensure there are no goofy txs
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
-            .ExactInputSingleParams({
-                tokenIn: tokenIn,
-                tokenOut: tokenOut,
-                fee: poolFee,
-                recipient: msg.sender,
-                deadline: block.timestamp,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                sqrtPriceLimitX96: 0
-            });
-
-        amountOut = swapRouter.exactInputSingle(params);
-    }
-
     function swapTokenForEth(uint256 tokenAmount)
-        public
+        internal
         returns (uint256 amountOut)
     {
-        amountOut = swapExactInputSingle(
-            tokenAmount,
-            msg.sender,
-            address(weth)
-        );
-        weth.withdraw(amountOut);
+        // TODO
     }
 
     function withdraw() public onlyOwner returns (bool) {

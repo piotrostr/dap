@@ -4,24 +4,17 @@ import DegeneratePartyAbi from "../artifacts/contracts/DegenerateApeParty.sol/De
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 import { DegenerateApeParty } from "../typechain";
-import { parseEther } from "ethers/lib/utils";
 
 const { deployContract, provider } = waffle;
 
-const routerAddressV3 = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
-const wethAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-
-describe("DegenerateApeParty", () => {
+describe("DegenerateApeParty - base", () => {
   let signers: SignerWithAddress[];
   let owner: SignerWithAddress;
   let contract: DegenerateApeParty;
   let marketingWallet: string;
   let drinksWallet: string;
   let venueWallet: string;
-  let initialDapPrice: BigNumber;
-  let weth: any;
 
-  // functions to be used throughout the tests
   const setMarketingWallet = async () => {
     const set = await contract.setMarketingWallet(marketingWallet);
     await set.wait();
@@ -40,47 +33,19 @@ describe("DegenerateApeParty", () => {
     expect(await contract.drinksWallet()).to.equal(drinksWallet);
   };
 
-  const sendDapAndEthToContract = async () => {
-    const ethTransferTx = await owner.sendTransaction({
-      from: owner.address,
-      to: contract.address,
-      value: parseEther("100"),
-    });
-    await ethTransferTx.wait();
-    const dapIn = parseEther("50000");
-    const dapTransferTx = await contract.transferFrom(
-      owner.address,
-      contract.address,
-      dapIn,
-    );
-    await dapTransferTx.wait();
-  };
-
   before(async () => {
     signers = await ethers.getSigners();
     owner = signers[0];
     marketingWallet = await signers[1].getAddress();
     venueWallet = await signers[2].getAddress();
     drinksWallet = await signers[3].getAddress();
-    const hre = require("hardhat");
-    weth = await hre.ethers.getVerifiedContractAt(wethAddress);
   });
 
   beforeEach(async () => {
+    const routerAddress = "";
     contract = (await deployContract(owner, DegeneratePartyAbi, [
-      routerAddressV3,
-      wethAddress,
+      routerAddress,
     ])) as DegenerateApeParty;
-
-    const approval = await contract.approve(
-      owner.address,
-      await contract.totalSupply(),
-    );
-    await approval.wait();
-
-    expect(await contract.allowance(owner.address, owner.address)).to.equal(
-      await contract.totalSupply(),
-    );
   });
 
   describe("constants", () => {
@@ -168,85 +133,4 @@ describe("DegenerateApeParty", () => {
       await setDrinksWallet();
     });
   });
-
-  describe("adds liquidity", () => {});
-
-  describe("swapping", () => {
-    it("swaps dap for eth", async () => {
-      const approval = await contract.approve(
-        contract.address,
-        await contract.balanceOf(owner.address),
-      );
-      await approval.wait();
-
-      // for this swap to go through liquidity has to be in the lp
-      const output = await contract.swapTokenForEth(parseEther("2000"));
-      const swap = await contract.swapTokenForEth(parseEther("2000"));
-      console.log(output);
-      await swap.wait();
-    });
-  });
-
-  /*
-  describe("fees", () => {
-    it("owner is excluded from the fees", async () => {
-      await setMarketingWallet();
-      const amount = parseEther("2");
-
-      const marketingBalance0 = await provider.getBalance(marketingWallet);
-
-      const transfer = await contract.transferFrom(
-        owner.address,
-        bob.address,
-        amount,
-      );
-      transfer.wait();
-
-      expect(await contract.balanceOf(bob.address)).to.equal(amount);
-      const marketingBalance1 = await provider.getBalance(marketingWallet);
-
-      expect(marketingBalance1.eq(marketingBalance0));
-    });
-
-    it("takes the marketing fees", async () => {
-      await setMarketingWallet();
-      const amount = parseEther("2");
-
-      await owner.sendTransaction({
-        from: owner.address,
-        to: contract.address,
-        value: amount,
-      });
-
-      expect(await provider.getBalance(contract.address)).to.eq(amount);
-
-      const transferToBob = await contract.transferFrom(
-        owner.address,
-        bob.address,
-        amount,
-      );
-      transferToBob.wait();
-
-      expect(await contract.balanceOf(bob.address)).to.equal(amount);
-
-      contract = contract.connect(bob);
-      await (
-        await contract.approve(bob.address, await contract.totalSupply())
-      ).wait();
-
-      const marketingBalance0 = await provider.getBalance(marketingWallet);
-
-      const transferWithFee = await contract.transfer(alice.address, amount, {
-        from: bob.address,
-      });
-      await transferWithFee.wait();
-
-      const marketingBalance1 = await provider.getBalance(marketingWallet);
-
-      const feeAmount = amount.mul(19).div(100);
-      const marketingFee = amount.mul(8).div(19);
-      expect(marketingBalance1.gt(marketingBalance0)).to.be.true;
-    });
-  });
-  */
 });
