@@ -84,7 +84,7 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_KEY,
   },
   abiExporter: {
-    path: "./artifacts/abi",
+    path: "./abi",
     runOnCompile: true,
     clear: true,
     flat: true,

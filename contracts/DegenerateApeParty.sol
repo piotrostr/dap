@@ -5,9 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "./interfaces/IPancakeRouter02.sol";
 import "./interfaces/IPancakePair.sol";
 import "./interfaces/IPancakeFactory.sol";
+import "./interfaces/IPancakeRouter02.sol";
 
 import "hardhat/console.sol";
 
