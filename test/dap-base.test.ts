@@ -15,24 +15,6 @@ describe("DegenerateApeParty - base", () => {
   let drinksWallet: string;
   let venueWallet: string;
 
-  const setMarketingWallet = async () => {
-    const set = await contract.setMarketingWallet(marketingWallet);
-    await set.wait();
-    expect(await contract.marketingWallet()).to.equal(marketingWallet);
-  };
-
-  const setVenueWallet = async () => {
-    const set = await contract.setVenueWallet(venueWallet);
-    await set.wait();
-    expect(await contract.venueWallet()).to.equal(venueWallet);
-  };
-
-  const setDrinksWallet = async () => {
-    const set = await contract.setDrinksWallet(drinksWallet);
-    await set.wait();
-    expect(await contract.drinksWallet()).to.equal(drinksWallet);
-  };
-
   before(async () => {
     signers = await ethers.getSigners();
     owner = signers[0];
@@ -42,7 +24,7 @@ describe("DegenerateApeParty - base", () => {
   });
 
   beforeEach(async () => {
-    const routerAddress = "";
+    const routerAddress = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
     contract = (await deployContract(owner, DegeneratePartyAbi, [
       routerAddress,
     ])) as DegenerateApeParty;
@@ -122,15 +104,21 @@ describe("DegenerateApeParty - base", () => {
 
   describe("setting wallets", () => {
     it("sets the marketing wallet properly", async () => {
-      await setMarketingWallet();
+      const set = await contract.setMarketingWallet(marketingWallet);
+      await set.wait();
+      expect(await contract.marketingWallet()).to.equal(marketingWallet);
     });
 
     it("sets the venue wallet properly", async () => {
-      await setVenueWallet();
+      const set = await contract.setVenueWallet(venueWallet);
+      await set.wait();
+      expect(await contract.venueWallet()).to.equal(venueWallet);
     });
 
     it("sets the drinks wallet properly", async () => {
-      await setDrinksWallet();
+      const set = await contract.setDrinksWallet(drinksWallet);
+      await set.wait();
+      expect(await contract.drinksWallet()).to.equal(drinksWallet);
     });
   });
 });

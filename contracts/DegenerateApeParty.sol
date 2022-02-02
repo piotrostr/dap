@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+import "./interfaces/IPancakeRouter02.sol";
+import "./interfaces/IPancakePair.sol";
+import "./interfaces/IPancakeFactory.sol";
 
 import "hardhat/console.sol";
 
@@ -21,21 +25,25 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
 
     uint256 public _totalSupply = 10**24;
+
     address public marketingWallet;
     address public venueWallet;
     address public drinksWallet;
-    address public routerAddress;
 
     uint24 public constant poolFee = 2500;
+    address public pair;
+    IPancakeRouter02 public router;
+    IPancakeFactory public factory;
 
-    IUniswapV2Router public immutable router;
-
-    constructor(IUniswapV2Router _router) {
-        router = _router;
+    constructor(address _routerAddress) {
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
         venueWallet = owner();
         drinksWallet = owner();
+
+        router = IPancakeRouter02(_routerAddress);
+        factory = IPancakeFactory(router.factory());
+        pair = factory.createPair(address(this), router.WETH());
     }
 
     receive() external payable {}
@@ -57,7 +65,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         address to,
         uint256 amount
     ) internal override {
-        if (msg.sender == owner() || msg.sender == routerAddress) {
+        if (msg.sender == owner() || msg.sender == address(router)) {
             super._transfer(from, to, amount);
         } else {
             uint256 ethOut = swapTokenForEth(amount.mul(19).div(100));
@@ -73,8 +81,24 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         }
     }
 
-    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) public {
-        // TODO
+    function addLiquidity(uint256 _amountToken, uint256 _amountETH)
+        public
+        returns (
+            uint256 amountToken,
+            uint256 amountETH,
+            uint256 liquidity
+        )
+    {
+        (amountToken, amountETH, liquidity) = router.addLiquidityETH{
+            value: _amountETH
+        }(
+            address(this), // token
+            _amountToken, // amountTokenDesired
+            0, // amountTokenMin
+            0, // amountETHMin
+            owner(), // lp tokens recipient
+            block.timestamp // deadline
+        );
     }
 
     function swapTokenForEth(uint256 tokenAmount)

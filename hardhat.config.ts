@@ -29,7 +29,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.7",
+        version: "0.8.9",
         settings: {
           optimizer: {
             enabled: true,
@@ -52,7 +52,6 @@ const config: HardhatUserConfig = {
     outDir: "./typechain",
     target: "ethers-v5",
   },
-  defaultNetwork: "localhost",
   networks: {
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
@@ -63,13 +62,17 @@ const config: HardhatUserConfig = {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`,
       chainId: 4,
     },
+    hardhat: {
+      accounts,
+      forking: {
+        url: "https://bsc-dataseed.binance.org/",
+      },
+      chainId: 56,
+    },
     bsc: {
       accounts,
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
-    },
-    localhost: {
-      url: "http://localhost:8545",
     },
   },
   gasReporter: {
