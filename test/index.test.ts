@@ -18,6 +18,7 @@ describe("DegenerateApeParty", () => {
   let drinksWallet: string;
   let venueWallet: string;
   let initialDapPrice: BigNumber;
+  let weth: any;
 
   // functions to be used throughout the tests
   const setMarketingWallet = async () => {
@@ -44,6 +45,8 @@ describe("DegenerateApeParty", () => {
     marketingWallet = await signers[1].getAddress();
     venueWallet = await signers[2].getAddress();
     drinksWallet = await signers[3].getAddress();
+    const hre = require("hardhat");
+    weth = await hre.ethers.getVerifiedContractAt(await contract.WETH9());
   });
 
   beforeEach(async () => {
@@ -161,6 +164,10 @@ describe("DegenerateApeParty", () => {
     it("sets the drinks wallet properly", async () => {
       await setDrinksWallet();
     });
+  });
+
+  describe("swapping", () => {
+    it("swaps dap for eth", () => {});
   });
 
   /*

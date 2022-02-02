@@ -13,7 +13,6 @@ describe("SwapExamples", () => {
   let contract: SwapExamples;
   let owner: SignerWithAddress;
   let weth: any;
-  let dai: any;
   let uni: any;
 
   before(async () => {
@@ -24,7 +23,6 @@ describe("SwapExamples", () => {
     ])) as SwapExamples;
     const hre = require("hardhat");
     weth = await hre.ethers.getVerifiedContractAt(await contract.WETH9());
-    dai = await hre.ethers.getVerifiedContractAt(await contract.DAI());
     uni = await hre.ethers.getVerifiedContractAt(await contract.UNI());
   });
 

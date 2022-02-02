@@ -8,27 +8,32 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
+import "./interfaces/IWETH.sol";
+
+import "hardhat/console.sol";
+
 contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
-    uint24 public constant poolFee = 2500;
 
     uint256 public _totalSupply = 10**24;
-
     address public marketingWallet;
     address public venueWallet;
     address public drinksWallet;
-
     address public routerAddress;
-    address public WETH;
+
+    uint24 public constant poolFee = 2500;
+    address public constant WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     ISwapRouter public immutable swapRouter;
+    IWETH public immutable weth;
 
-    constructor(ISwapRouter _swapRouter) {
+    constructor(ISwapRouter _swapRouter, IWETH _weth) {
         swapRouter = _swapRouter;
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
         venueWallet = owner();
         drinksWallet = owner();
+        weth = _weth;
     }
 
     receive() external payable {}
@@ -53,9 +58,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         if (msg.sender == owner() || msg.sender == routerAddress) {
             super._transfer(from, to, amount);
         } else {
-            uint256 balanceBefore = address(this).balance;
-            swapTokenForEth(amount.mul(19).div(100));
-            uint256 ethOut = (address(this).balance).sub(balanceBefore);
+            uint256 ethOut = swapTokenForEth(amount.mul(19).div(100));
 
             payable(marketingWallet).transfer(ethOut.mul(8).div(19));
             payable(venueWallet).transfer(ethOut.mul(9).div(19));
@@ -68,11 +71,55 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         }
     }
 
-    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) public {}
+    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) public {
+        // TODO
+    }
 
-    function swapEthForToken(uint256 ethAmount) public {}
+    function swapExactInputSingle(
+        uint256 amountIn,
+        address tokenIn,
+        address tokenOut
+    ) public returns (uint256 amountOut) {
+        TransferHelper.safeTransferFrom(
+            WETH9,
+            msg.sender,
+            address(this),
+            amountIn
+        );
+        TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
 
-    function swapTokenForEth(uint256 tokenAmount) public {}
+        // TODO use oracle to ensure there are no goofy txs
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
+            .ExactInputSingleParams({
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                fee: poolFee,
+                recipient: msg.sender,
+                deadline: block.timestamp,
+                amountIn: amountIn,
+                amountOutMinimum: 0,
+                sqrtPriceLimitX96: 0
+            });
+
+        amountOut = swapRouter.exactInputSingle(params);
+    }
+
+    function swapTokenForEth(uint256 tokenAmount)
+        public
+        returns (uint256 amountOut)
+    {
+        // this could be internal but I wanna test it to
+        // get that sweet 100% coverage
+        console.log(msg.sender);
+        console.log(address(this));
+        require(msg.sender == address(this));
+        amountOut = swapExactInputSingle(
+            tokenAmount,
+            address(this),
+            address(weth)
+        );
+        weth.withdraw(amountOut);
+    }
 
     function withdraw() public onlyOwner returns (bool) {
         uint256 amount = address(this).balance;
