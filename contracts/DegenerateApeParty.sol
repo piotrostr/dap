@@ -35,6 +35,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     IPancakeRouter02 public router;
     IPancakeFactory public factory;
 
+    event AddedLiquidity(uint256 dapAmount, uint256 ethAmount);
+
     constructor(address _routerAddress) {
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
@@ -76,6 +78,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
             payable(drinksWallet).transfer(ethOut.div(19));
 
             addLiquidity(amount.div(100), ethOut.div(19));
+            emit AddedLiquidity(amount.div(100), ethOut.div(19));
 
             uint256 amountPostFee = amount.mul(80).div(100);
             super._transfer(from, to, amountPostFee);

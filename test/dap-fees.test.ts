@@ -10,6 +10,7 @@ import {
 } from "../typechain";
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
+import { check } from "prettier";
 
 const { deployContract, provider } = waffle;
 
@@ -192,6 +193,25 @@ describe("DegenerateApeParty - fees", () => {
       await checkIfTakesRightFee(drinksWallet, feeAmount);
     });
 
-    it("takes the 2% autoliquidity fee and adds liquidity", async () => {});
+    it("takes the 2% autoliquidity fee and adds liquidity", async () => {
+      const bob = signers[2];
+      const alice = signers[3];
+      const transferAmount = parseEther("5000");
+      const giveToBob = await contract.transferFrom(
+        owner.address,
+        bob.address,
+        transferAmount,
+      );
+      await giveToBob.wait();
+      contract = contract.connect(bob);
+      const approval = await contract.approve(bob.address, transferAmount);
+      await approval.wait();
+      expect(await contract.allowance(bob.address, bob.address)).to.eq(
+        transferAmount,
+      );
+      await expect(
+        contract.transferFrom(bob.address, alice.address, transferAmount),
+      ).to.emit(contract, "AddedLiquidity");
+    });
   });
 });
