@@ -20,13 +20,6 @@ jobs:
         with:
           cmd: install
 
-      - name: Run Lint
-        uses: contractshark/inject-solhint-ci@master
-        with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          solhint_input: 'contracts/*.sol'
-
       - name: Run Tests
         uses: borales/actions-yarn@master
         with:
@@ -37,3 +30,12 @@ jobs:
         with:
           verbose: true 
 
+  solhint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: solhint
+        uses: contractshark/inject-solhint-ci@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          solhint_input: 'contracts/*.sol'
