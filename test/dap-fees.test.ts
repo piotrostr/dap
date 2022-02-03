@@ -159,7 +159,7 @@ describe("DegenerateApeParty - fees", () => {
     };
 
     beforeEach(async () => {
-      [marketingWallet, venueWallet, drinksWallet] = await setAndGetWallets();
+      [marketingWallet, partyWallet] = await setAndGetWallets();
     });
 
     it("owner is excluded from the fees", async () => {

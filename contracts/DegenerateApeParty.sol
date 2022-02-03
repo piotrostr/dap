@@ -24,10 +24,16 @@ interface IUniswapV2Router {
 contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
 
-    uint256 public _totalSupply = 10**24;
+    uint256 private _totalSupply = 10**24;
 
     address public marketingWallet;
     address public partyWallet;
+
+    uint256 public marketingFee = 8;
+    uint256 public partyFee = 10;
+    uint256 public liquidityFee = 1; // is actually 2%, as another 1% swaps into eth
+
+    bool public elevatedFees = false;
 
     uint24 public constant poolFee = 2500;
     address public pair;
@@ -56,6 +62,19 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         partyWallet = newAddress;
     }
 
+    function toggleFees() public onlyOwner {
+        elevatedFees = !elevatedFees;
+        if (elevatedFees == true) {
+            marketingFee = 99;
+            partyFee = 0;
+            liquidityFee = 0;
+        } else {
+            marketingFee = 8;
+            partyFee = 10;
+            liquidityFee = 1;
+        }
+    }
+
     function _transfer(
         address from,
         address to,
@@ -64,16 +83,35 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         if (msg.sender == owner() || msg.sender == address(router)) {
             super._transfer(from, to, amount);
         } else {
-            uint256[] memory amounts = swapDapForEth(amount.mul(19).div(100));
+            uint256 totalFee = marketingFee.add(partyFee).add(liquidityFee);
+            uint256 dapToSwap = amount.mul(totalFee).div(100);
+            uint256 amountPostFee = amount.sub(dapToSwap);
+
+            uint256[] memory amounts = swapDapForEth(dapToSwap);
+            uint256 dapOut = amounts[0];
             uint256 ethOut = amounts[1];
 
-            payable(marketingWallet).transfer(ethOut.mul(8).div(19));
-            payable(partyWallet).transfer(ethOut.mul(10).div(19));
+            // add up the remainder that doesnt get swapped
+            amountPostFee = amountPostFee.add(dapToSwap.sub(dapOut));
 
-            addLiquidity(amount.div(100), ethOut.div(19));
-            emit AddedLiquidity(amount.div(100), ethOut.div(19));
+            uint256 marketingEth = ethOut.mul(marketingFee).div(totalFee);
+            uint256 partyEth = ethOut.mul(partyFee).div(totalFee);
+            uint256 liquidityEth = ethOut.mul(liquidityFee).div(totalFee);
+            uint256 liquidityDap = amount.div(100);
 
-            uint256 amountPostFee = amount.mul(80).div(100);
+            // marketing fee is never 0
+            payable(marketingWallet).transfer(marketingEth);
+
+            if (partyFee != 0) {
+                payable(partyWallet).transfer(partyEth);
+            }
+
+            if (liquidityFee != 0) {
+                addLiquidity(liquidityDap, liquidityEth);
+                emit AddedLiquidity(liquidityDap, liquidityEth);
+                amountPostFee = amountPostFee.sub(liquidityDap);
+            }
+
             super._transfer(from, to, amountPostFee);
         }
     }
