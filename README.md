@@ -1,4 +1,13 @@
-### CONTRACT REQUIREMENTS:
+<div align="center">
+  <h1>
+    Degenerate Ape Party
+  </h1>
+    <a href="https://github.com/piotrostr/degenerate-ape-party/blob/HEAD/MIT">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native is released under the MIT license." />
+  </a>
+</div>
+
+## Contract requirements:
 
 - Taxes as a base : 20% split into 10% party 8% marketing 2% auto liquidity
 
