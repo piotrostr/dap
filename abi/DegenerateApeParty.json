@@ -23,6 +23,7 @@
   "function setDrinksWallet(address)",
   "function setMarketingWallet(address)",
   "function setVenueWallet(address)",
+  "function swapDapForEth(uint256) returns (uint256[])",
   "function symbol() view returns (string)",
   "function totalSupply() view returns (uint256)",
   "function transfer(address,uint256) returns (bool)",

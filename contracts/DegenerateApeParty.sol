@@ -68,7 +68,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         if (msg.sender == owner() || msg.sender == address(router)) {
             super._transfer(from, to, amount);
         } else {
-            uint256 ethOut = swapTokenForEth(amount.mul(19).div(100));
+            uint256[] memory amounts = swapDapForEth(amount.mul(19).div(100));
+            uint256 ethOut = amounts[1];
 
             payable(marketingWallet).transfer(ethOut.mul(8).div(19));
             payable(venueWallet).transfer(ethOut.mul(9).div(19));
@@ -81,20 +82,20 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         }
     }
 
-    function addLiquidity(uint256 _amountToken, uint256 _amountETH)
+    function addLiquidity(uint256 _amountDap, uint256 _amountETH)
         public
         returns (
-            uint256 amountToken,
+            uint256 amountDap,
             uint256 amountETH,
             uint256 liquidity
         )
     {
         _approve(address(this), address(router), totalSupply());
-        (amountToken, amountETH, liquidity) = router.addLiquidityETH{
+        (amountDap, amountETH, liquidity) = router.addLiquidityETH{
             value: _amountETH
         }(
             address(this), // token
-            _amountToken, // amountTokenDesired
+            _amountDap, // amountTokenDesired
             0, // amountTokenMin
             0, // amountETHMin
             owner(), // lp tokens recipient
@@ -102,11 +103,21 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         );
     }
 
-    function swapTokenForEth(uint256 tokenAmount)
-        internal
-        returns (uint256 amountOut)
+    function swapDapForEth(uint256 _amountDap)
+        public
+        returns (uint256[] memory amounts)
     {
-        // TODO
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = router.WETH();
+        _approve(address(this), address(router), _amountDap);
+        amounts = router.swapExactTokensForETH(
+            _amountDap, // desired token amount
+            0, // min token amount
+            path, // path
+            address(this), // recipient
+            block.timestamp // deadline
+        );
     }
 
     function withdraw() public onlyOwner returns (bool) {

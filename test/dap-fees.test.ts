@@ -9,6 +9,7 @@ import {
   IPancakeFactory,
 } from "../typechain";
 import { parseEther } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
 
 const { deployContract, provider } = waffle;
 
@@ -19,6 +20,19 @@ describe("DegenerateApeParty - fees", () => {
   let router: IPancakeRouter02;
   let factory: IPancakeFactory;
   let pair: IPancakePair;
+
+  const addLiquidity = async () => {
+    const dapIn = parseEther("50000");
+    const ethIn = parseEther("50");
+    expect((await contract.balanceOf(contract.address)).gte(dapIn));
+    expect((await provider.getBalance(contract.address)).gte(ethIn));
+    const liqTx = await contract.addLiquidity(dapIn, ethIn);
+    await liqTx.wait();
+    const reserves = await pair.callStatic.getReserves();
+    const { reserve0, reserve1 } = reserves;
+    expect(reserve0.eq(dapIn));
+    expect(reserve1.eq(ethIn));
+  };
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -77,30 +91,107 @@ describe("DegenerateApeParty - fees", () => {
     expect(await provider.getBalance(contract.address)).to.equal(
       ethBalance0.add(ethIn),
     );
+    await addLiquidity();
   });
 
-  describe("pancake functionality", () => {
-    beforeEach(async () => {});
-
-    it("adds liquidity to pair DAP/ETH right", async () => {
-      const dapIn = parseEther("50000");
-      const ethIn = parseEther("50");
-      expect((await contract.balanceOf(contract.address)).gte(dapIn));
-      expect((await provider.getBalance(contract.address)).gte(ethIn));
-      const liqTx = await contract.addLiquidity(dapIn, ethIn);
-      await liqTx.wait();
-      const reserves = await pair.callStatic.getReserves();
-      const { reserve0, reserve1 } = reserves;
-      expect(reserve0.eq(dapIn));
-      expect(reserve1.eq(ethIn));
-    });
-
-    it("swaps DAP for ETH", () => {});
-  });
+  /**
+   * to pass below, change the visibilitiy of the
+   * methods addLiquidity and swapDapForEth in DAP contract (those work)
+   **
+   * describe("pancake functionality", () => {
+   *
+   *   it("adds liquidity to pair DAP/ETH right", async () => {
+   *     await addLiquidity();
+   *   });
+   *
+   *   it("swaps DAP for ETH", async () => {
+   *     await addLiquidity();
+   *     const tx = await contract.swapDapForEth(parseEther("5000"));
+   *     await tx.wait();
+   *   });
+   * });
+   */
 
   describe("fees", () => {
-    it("owner is excluded from the fees", async () => {});
+    let marketingWallet: string;
+    let venueWallet: string;
+    let drinksWallet: string;
 
-    it("takes the marketing fees", async () => {});
+    const setAndGetWallets = async () => {
+      const txs = await Promise.all([
+        contract.setMarketingWallet(signers[6].address),
+        contract.setVenueWallet(signers[7].address),
+        contract.setDrinksWallet(signers[8].address),
+      ]);
+      await Promise.all(txs.map(tx => tx.wait()));
+      return await Promise.all([
+        contract.marketingWallet(),
+        contract.venueWallet(),
+        contract.drinksWallet(),
+      ]);
+    };
+
+    const checkIfTakesRightFee = async (
+      wallet: string,
+      feeAmount: BigNumber,
+    ) => {
+      const bob = signers[2];
+      const alice = signers[3];
+      const balance0 = await provider.getBalance(wallet);
+      const transferAmount = parseEther("50000");
+      const giveToBob = await contract.transferFrom(
+        owner.address,
+        bob.address,
+        transferAmount,
+      );
+      await giveToBob.wait();
+      contract = contract.connect(bob);
+      const approval = await contract.approve(bob.address, transferAmount);
+      await approval.wait();
+      expect(await contract.allowance(bob.address, bob.address)).to.eq(
+        transferAmount,
+      );
+      const tx = await contract.transferFrom(
+        bob.address,
+        alice.address,
+        transferAmount,
+      );
+      await tx.wait();
+      const balance1 = await provider.getBalance(wallet);
+      expect(balance1.eq(balance0.add(transferAmount.mul(feeAmount))));
+    };
+
+    beforeEach(async () => {
+      [marketingWallet, venueWallet, drinksWallet] = await setAndGetWallets();
+    });
+
+    it("owner is excluded from the fees", async () => {
+      const marketingBalance0 = await provider.getBalance(marketingWallet);
+      const tx = await contract.transferFrom(
+        owner.address,
+        signers[2].address,
+        parseEther("5000"),
+      );
+      await tx.wait();
+      const marketingBalance1 = await provider.getBalance(marketingWallet);
+      expect(marketingBalance1.eq(marketingBalance0));
+    });
+
+    it("takes the 8% marketing fees", async () => {
+      const feeAmount = BigNumber.from("8").mul(BigNumber.from("100"));
+      await checkIfTakesRightFee(marketingWallet, feeAmount);
+    });
+
+    it("takes the 9% venue fees", async () => {
+      const feeAmount = BigNumber.from("9").div(BigNumber.from("100"));
+      await checkIfTakesRightFee(venueWallet, feeAmount);
+    });
+
+    it("takes the 1% drinks fees", async () => {
+      const feeAmount = BigNumber.from("1").div(BigNumber.from("100"));
+      await checkIfTakesRightFee(drinksWallet, feeAmount);
+    });
+
+    it("takes the 2% autoliquidity fee and adds liquidity", async () => {});
   });
 });
