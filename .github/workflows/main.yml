@@ -15,10 +15,17 @@ jobs:
         with:
           node-version: "17.4.0"
 
-      - name: install packages
+      - name: Install Packages
         uses: borales/actions-yarn@master
         with:
           cmd: install
+
+      - name: Run Lint
+        uses: contractshark/inject-solhint-ci@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          solhint_input: 'contracts/*.sol'
 
       - name: Run Tests
         uses: borales/actions-yarn@master
