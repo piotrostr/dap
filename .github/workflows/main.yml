@@ -1,0 +1,36 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "17.4.0"
+
+      - name: install packages
+        uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+
+      - name: run tests
+        uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: coverage 
+
+      - name: coveralls report
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
