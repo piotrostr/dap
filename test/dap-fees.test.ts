@@ -215,6 +215,30 @@ describe("DegenerateApeParty - fees", () => {
         expect(elevatedFees1).to.be.true;
       });
 
+      it("toggling fees sets them to right amounts (99% 0% 0% and 8% 10% 1%)", async () => {
+        const elevatedFees0 = await contract.elevatedFees();
+        expect(elevatedFees0).to.be.false;
+        expect(await contract.marketingFee()).to.equal(BigNumber.from("8"));
+        expect(await contract.partyFee()).to.equal(BigNumber.from("10"));
+        expect(await contract.liquidityFee()).to.equal(BigNumber.from("1"));
+
+        const toggle1 = await contract.toggleFees();
+        await toggle1.wait();
+        const elevatedFees1 = await contract.elevatedFees();
+        expect(elevatedFees1).to.be.true;
+        expect(await contract.marketingFee()).to.equal(BigNumber.from("99"));
+        expect(await contract.partyFee()).to.equal(BigNumber.from("0"));
+        expect(await contract.liquidityFee()).to.equal(BigNumber.from("0"));
+
+        const toggle2 = await contract.toggleFees();
+        await toggle2.wait();
+        const elevatedFees2 = await contract.elevatedFees();
+        expect(elevatedFees2).to.be.false;
+        expect(await contract.marketingFee()).to.equal(BigNumber.from("8"));
+        expect(await contract.partyFee()).to.equal(BigNumber.from("10"));
+        expect(await contract.liquidityFee()).to.equal(BigNumber.from("1"));
+      });
+
       it("takes the 99% elevated fee (to marketing wallet) if it is toggled", async () => {
         const elevate = await contract.toggleFees();
         await elevate.wait();
