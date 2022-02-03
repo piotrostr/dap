@@ -54,6 +54,13 @@ const config: HardhatUserConfig = {
     target: "ethers-v5",
   },
   networks: {
+    local: {
+      accounts,
+      url: "http://127.0.0.1:8545",
+      forking: {
+        url: "https://bsc-dataseed.binance.org/",
+      },
+    },
     hardhat: {
       forking: {
         url: `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_KEY}/bsc/mainnet/archive`,

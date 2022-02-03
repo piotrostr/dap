@@ -1,6 +1,6 @@
 account_id: 593eb6bb-5586-4af9-bcbb-f88288a3994b
 exports:
-  hardhat:
+  bsc-fork:
     project_slug: piotrostr/dap
     rpc_address: 127.0.0.1:8545
     protocol: ""
