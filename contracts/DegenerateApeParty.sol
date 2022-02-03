@@ -27,8 +27,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     uint256 public _totalSupply = 10**24;
 
     address public marketingWallet;
-    address public venueWallet;
-    address public drinksWallet;
+    address public partyWallet;
 
     uint24 public constant poolFee = 2500;
     address public pair;
@@ -40,8 +39,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     constructor(address _routerAddress) {
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
-        venueWallet = owner();
-        drinksWallet = owner();
+        partyWallet = owner();
 
         router = IPancakeRouter02(_routerAddress);
         factory = IPancakeFactory(router.factory());
@@ -54,12 +52,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         marketingWallet = newAddress;
     }
 
-    function setVenueWallet(address newAddress) public onlyOwner {
-        venueWallet = newAddress;
-    }
-
-    function setDrinksWallet(address newAddress) public onlyOwner {
-        drinksWallet = newAddress;
+    function setPartyWallet(address newAddress) public onlyOwner {
+        partyWallet = newAddress;
     }
 
     function _transfer(
@@ -74,8 +68,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
             uint256 ethOut = amounts[1];
 
             payable(marketingWallet).transfer(ethOut.mul(8).div(19));
-            payable(venueWallet).transfer(ethOut.mul(9).div(19));
-            payable(drinksWallet).transfer(ethOut.div(19));
+            payable(partyWallet).transfer(ethOut.mul(10).div(19));
 
             addLiquidity(amount.div(100), ethOut.div(19));
             emit AddedLiquidity(amount.div(100), ethOut.div(19));

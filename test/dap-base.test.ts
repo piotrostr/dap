@@ -12,15 +12,13 @@ describe("DegenerateApeParty - base", () => {
   let owner: SignerWithAddress;
   let contract: DegenerateApeParty;
   let marketingWallet: string;
-  let drinksWallet: string;
-  let venueWallet: string;
+  let partyWallet: string;
 
   before(async () => {
     signers = await ethers.getSigners();
     owner = signers[0];
     marketingWallet = await signers[1].getAddress();
-    venueWallet = await signers[2].getAddress();
-    drinksWallet = await signers[3].getAddress();
+    partyWallet = await signers[2].getAddress();
   });
 
   beforeEach(async () => {
@@ -109,16 +107,10 @@ describe("DegenerateApeParty - base", () => {
       expect(await contract.marketingWallet()).to.equal(marketingWallet);
     });
 
-    it("sets the venue wallet properly", async () => {
-      const set = await contract.setVenueWallet(venueWallet);
+    it("sets the party wallet properly", async () => {
+      const set = await contract.setPartyWallet(partyWallet);
       await set.wait();
-      expect(await contract.venueWallet()).to.equal(venueWallet);
-    });
-
-    it("sets the drinks wallet properly", async () => {
-      const set = await contract.setDrinksWallet(drinksWallet);
-      await set.wait();
-      expect(await contract.drinksWallet()).to.equal(drinksWallet);
+      expect(await contract.partyWallet()).to.equal(partyWallet);
     });
   });
 });

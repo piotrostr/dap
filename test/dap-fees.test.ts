@@ -114,20 +114,17 @@ describe("DegenerateApeParty - fees", () => {
 
   describe("fees", () => {
     let marketingWallet: string;
-    let venueWallet: string;
-    let drinksWallet: string;
+    let partyWallet: string;
 
     const setAndGetWallets = async () => {
       const txs = await Promise.all([
         contract.setMarketingWallet(signers[6].address),
-        contract.setVenueWallet(signers[7].address),
-        contract.setDrinksWallet(signers[8].address),
+        contract.setPartyWallet(signers[7].address),
       ]);
       await Promise.all(txs.map(tx => tx.wait()));
       return await Promise.all([
         contract.marketingWallet(),
-        contract.venueWallet(),
-        contract.drinksWallet(),
+        contract.partyWallet(),
       ]);
     };
 
@@ -177,19 +174,14 @@ describe("DegenerateApeParty - fees", () => {
       expect(marketingBalance1.eq(marketingBalance0));
     });
 
-    it("takes the 8% marketing fees", async () => {
+    it("takes the 8% marketing fee", async () => {
       const feeAmount = BigNumber.from("8").mul(BigNumber.from("100"));
       await checkIfTakesRightFee(marketingWallet, feeAmount);
     });
 
-    it("takes the 9% venue fees", async () => {
-      const feeAmount = BigNumber.from("9").div(BigNumber.from("100"));
-      await checkIfTakesRightFee(venueWallet, feeAmount);
-    });
-
-    it("takes the 1% drinks fees", async () => {
-      const feeAmount = BigNumber.from("1").div(BigNumber.from("100"));
-      await checkIfTakesRightFee(drinksWallet, feeAmount);
+    it("takes the 10% party fee", async () => {
+      const feeAmount = BigNumber.from("10").div(BigNumber.from("100"));
+      await checkIfTakesRightFee(partyWallet, feeAmount);
     });
 
     it("takes the 2% autoliquidity fee and adds liquidity", async () => {
@@ -212,5 +204,27 @@ describe("DegenerateApeParty - fees", () => {
         contract.transferFrom(bob.address, alice.address, transferAmount),
       ).to.emit(contract, "AddedLiquidity");
     });
+
+    describe("elevated fees", () => {
+      it("allows to set elevated fees of 99% to prevent botting", async () => {
+        const elevatedFees0 = await contract.elevatedFees();
+        expect(elevatedFees0).to.be.false;
+        const elevate = await contract.toggleFees();
+        await elevate.wait();
+        const elevatedFees1 = await contract.elevatedFees();
+        expect(elevatedFees1).to.be.true;
+      });
+
+      it("takes the 99% elevated fee (to marketing wallet) if it is toggled", async () => {
+        const elevate = await contract.toggleFees();
+        await elevate.wait();
+        const elevatedFees = await contract.elevatedFees();
+        expect(elevatedFees).to.be.true;
+        const feeAmount = BigNumber.from("99").mul(BigNumber.from("100"));
+        await checkIfTakesRightFee(marketingWallet, feeAmount);
+      });
+    });
   });
+
+  describe("wallet lock", async () => {});
 });
