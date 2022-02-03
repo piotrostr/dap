@@ -35,7 +35,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
 
     bool public elevatedFees = false;
 
-    uint24 public constant poolFee = 2500;
+    uint24 public poolFee = 2500;
     address public pair;
     IPancakeRouter02 public router;
     IPancakeFactory public factory;
@@ -154,8 +154,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         );
     }
 
-    function withdraw() public onlyOwner returns (bool) {
+    function withdraw() public onlyOwner returns (bool success) {
         uint256 amount = address(this).balance;
-        return payable(owner()).send(amount);
+        success = payable(owner()).send(amount);
     }
 }
