@@ -1,11 +1,10 @@
 import { expect } from "chai";
 import { ethers, waffle } from "hardhat";
-import DegeneratePartyAbi from "../artifacts/contracts/DegenerateApeParty.sol/DegenerateApeParty.json";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 import { DegenerateApeParty } from "../typechain";
 
-const { deployContract, provider } = waffle;
+const { provider } = waffle;
 
 describe("DegenerateApeParty - base", () => {
   let signers: SignerWithAddress[];
@@ -23,9 +22,8 @@ describe("DegenerateApeParty - base", () => {
 
   beforeEach(async () => {
     const routerAddress = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
-    contract = (await deployContract(owner, DegeneratePartyAbi, [
-      routerAddress,
-    ])) as DegenerateApeParty;
+    const dap = await ethers.getContractFactory("DegenerateApeParty");
+    contract = (await dap.deploy(routerAddress)) as DegenerateApeParty;
   });
 
   describe("constants", () => {

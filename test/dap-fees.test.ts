@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { ethers, waffle } from "hardhat";
-import DegeneratePartyAbi from "../artifacts/contracts/DegenerateApeParty.sol/DegenerateApeParty.json";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   DegenerateApeParty,
@@ -11,7 +10,7 @@ import {
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
 
-const { deployContract, provider } = waffle;
+const { provider } = waffle;
 
 describe("DegenerateApeParty - fees", () => {
   let signers: SignerWithAddress[];
@@ -41,9 +40,8 @@ describe("DegenerateApeParty - fees", () => {
 
   beforeEach(async () => {
     const routerAddress = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
-    contract = (await deployContract(owner, DegeneratePartyAbi, [
-      routerAddress,
-    ])) as DegenerateApeParty;
+    const dap = await ethers.getContractFactory("DegenerateApeParty");
+    contract = (await dap.deploy(routerAddress)) as DegenerateApeParty;
 
     const approval = await contract.approve(
       owner.address,
