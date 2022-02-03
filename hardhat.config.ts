@@ -11,6 +11,7 @@ import "hardhat-tracer";
 import "hardhat-abi-exporter";
 import "hardhat-etherscan-abi";
 import "hardhat-change-network";
+import "@tenderly/hardhat-tenderly";
 
 import { task } from "hardhat/config";
 
@@ -56,7 +57,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_KEY}/bsc/mainnet/archive`,
-        blockNumber: 14915072,
+        blockNumber: 14944129,
       },
       chainId: 56,
     },
@@ -81,6 +82,10 @@ const config: HardhatUserConfig = {
     flat: true,
     spacing: 2,
     pretty: true,
+  },
+  tenderly: {
+    project: "DAP",
+    username: "piotrostr",
   },
 };
 
