@@ -23,19 +23,9 @@ jobs:
       - name: Run Tests
         uses: borales/actions-yarn@master
         with:
-          cmd: coverage 
-            
+          cmd: coverage
+
       - name: Codecov
         uses: codecov/codecov-action@master
         with:
-          verbose: true 
-
-  solhint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: solhint
-        uses: contractshark/inject-solhint-ci@master
-        with:
-          github_token: ${{ secrets.github_token }}
-          solhint_input: 'contracts/*.sol'
+          verbose: true
