@@ -10,8 +10,8 @@
   <a href="https://github.com/piotrostr/degenerate-ape-party/blob/HEAD/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="mit" />
   </a>
-  <a href='https://coveralls.io/github/piotrostr/degenerate-ape-party?branch=main'>
-    <img src='https://coveralls.io/repos/github/piotrostr/degenerate-ape-party/badge.svg?branch=main' alt='Coverage Status' />
+  <a href="https://codecov.io/gh/piotrostr/degenerate-ape-party">
+    <img src="https://codecov.io/gh/piotrostr/degenerate-ape-party/branch/main/graph/badge.svg?token=WYLQ5B7UGC" alt="coverage-status" />
   </a>
 </div>
 
