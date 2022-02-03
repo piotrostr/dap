@@ -10,7 +10,6 @@ import {
 } from "../typechain";
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
-import { check } from "prettier";
 
 const { deployContract, provider } = waffle;
 
