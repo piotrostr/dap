@@ -7,6 +7,7 @@ on:
 
 env:
   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+  MORALIS_KEY: ${{ secrets.MORALIS_KEY }}
 
 jobs:
   test:

@@ -23,7 +23,7 @@ task("accounts", "lists accounts", async (_, { ethers }) => {
   }
 });
 
-const accounts = { mnemonic: process?.env?.MNEMONIC };
+const accounts = { mnemonic: process.env.MNEMONIC || "" };
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -53,19 +53,7 @@ const config: HardhatUserConfig = {
     target: "ethers-v5",
   },
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts,
-    },
-    rinkeby: {
-      accounts,
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 4,
-    },
-    // there are pretty much no providers with free archive data for bsc
-    // TODO might just go on eth for tests not to take ages
     hardhat: {
-      accounts,
       forking: {
         url: `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_KEY}/bsc/mainnet/archive`,
         blockNumber: 14915072,
