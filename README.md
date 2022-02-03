@@ -1,11 +1,19 @@
+<h1 align="center">
+  Degenerate Ape Party
+</h1>
+<br />
 <div align="center">
-  <h1>
-    Degenerate Ape Party
-  </h1>
-    <a href="https://github.com/piotrostr/degenerate-ape-party/blob/HEAD/MIT">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native is released under the MIT license." />
-  </a>
+  <img src="https://user-images.githubusercontent.com/63755291/152405688-ae183528-9a77-443b-a92b-b21bb3f415d9.gif" alt="animated" />
 </div>
+<br />
+<div align="center">
+  <a href="https://github.com/piotrostr/degenerate-ape-party/blob/HEAD/MIT">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="mit" />
+  </a>
+  <img src="https://img.shields.io/coveralls/github/piotrostr/degenerate-ape-party" />
+</div>
+
+
 
 ## Contract requirements:
 
