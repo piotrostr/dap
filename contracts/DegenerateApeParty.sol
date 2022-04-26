@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2021 piotrostr.eth
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
