@@ -46,7 +46,8 @@
     "typescript": "^4.5.2"
   },
   "scripts": {
-    "coverage": "hardhat coverage"
+    "coverage": "hardhat coverage",
+    "test": "NODE_OPTIONS=--openssl-legacy-provider REPORTER=nyan hardhat test"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2"
