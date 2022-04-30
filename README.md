@@ -28,21 +28,10 @@
 
 ## Contract requirements:
 
-- Taxes: 20% split into 10% party 8% marketing 2% auto liquidity
-
-- Need a base buy and sell tax in the first few mins of 99% to prevent botting
-
-- an increased sell for the first 30min-hour of 50% then base as usual.
-  (bots dont use slippage)
-
-- The 99% tax at the beginning goes all into the marketing wallet with no max buy during the 5 mins
-
-- then tax reverts to normal after we rug the bots
-
-- Change contract name a few times up to launch potentially to prevent snipers
-
-- Lock wallets 6 months
-
-- Transfer ownership
-
-- Be able to withdraw from the contract
+[12:31 pm, 28/04/2022] bossman: 9% buy 9% sell as a base
+[12:32 pm, 28/04/2022] bossman: But first 24 hours after launch 5% buy 15% sell
+[12:33 pm, 28/04/2022] bossman: Make the contract automatically split to tax funds to different wallets
+[3:01 pm, 28/04/2022] bossman: Automatically send 78% of the funds to one wallet and 22% to a different wallet
+[3:01 pm, 28/04/2022] bossman: None of the bot thing needed
+[3:01 pm, 28/04/2022] bossman: toggle tax of baseline 9% buy 9% sell then can toggle for the first 48 hours 5% buy 15% sell
+[3:02 pm, 28/04/2022] bossman: transfer ownership still
