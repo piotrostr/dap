@@ -45,7 +45,9 @@ export interface DegenerateApePartyInterface extends utils.Interface {
     "swapDapForEth(uint256)": FunctionFragment;
     "symbol()": FunctionFragment;
     "toggleFees()": FunctionFragment;
+    "toggleTrading()": FunctionFragment;
     "totalSupply()": FunctionFragment;
+    "tradingEnabled()": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -123,7 +125,15 @@ export interface DegenerateApePartyInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "toggleTrading",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "totalSupply",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tradingEnabled",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -202,7 +212,15 @@ export interface DegenerateApePartyInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "toggleFees", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "toggleTrading",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "totalSupply",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tradingEnabled",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
@@ -369,7 +387,13 @@ export interface DegenerateApeParty extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    toggleTrading(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    tradingEnabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     transfer(
       recipient: string,
@@ -477,7 +501,13 @@ export interface DegenerateApeParty extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  toggleTrading(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+  tradingEnabled(overrides?: CallOverrides): Promise<boolean>;
 
   transfer(
     recipient: string,
@@ -587,7 +617,11 @@ export interface DegenerateApeParty extends BaseContract {
 
     toggleFees(overrides?: CallOverrides): Promise<void>;
 
+    toggleTrading(overrides?: CallOverrides): Promise<void>;
+
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingEnabled(overrides?: CallOverrides): Promise<boolean>;
 
     transfer(
       recipient: string,
@@ -736,7 +770,13 @@ export interface DegenerateApeParty extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    toggleTrading(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingEnabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
       recipient: string,
@@ -848,7 +888,13 @@ export interface DegenerateApeParty extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    toggleTrading(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tradingEnabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transfer(
       recipient: string,

@@ -23,7 +23,7 @@ interface IUniswapV2Router {
 contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     using SafeMath for uint256;
 
-    uint256 private _totalSupply = 10**24;
+    uint256 private _totalSupply = 10**25;
 
     address public marketingWallet;
     address public partyWallet;
@@ -39,6 +39,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     IPancakeRouter02 public router;
     IPancakeFactory public factory;
 
+    bool public tradingEnabled = true;
+
     event AddedLiquidity(uint256 dapAmount, uint256 ethAmount);
 
     constructor(address _routerAddress) {
@@ -52,6 +54,10 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     }
 
     receive() external payable {}
+
+    function toggleTrading() external onlyOwner {
+        tradingEnabled = !tradingEnabled;
+    }
 
     function setMarketingWallet(address newAddress) public onlyOwner {
         marketingWallet = newAddress;
@@ -79,6 +85,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         address to,
         uint256 amount
     ) internal override {
+        require(tradingEnabled, "trading is not enabled");
         if (msg.sender == owner() || msg.sender == address(router)) {
             super._transfer(from, to, amount);
         } else {

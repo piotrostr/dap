@@ -6,14 +6,15 @@ import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
-import "solidity-coverage";
 import "hardhat-tracer";
 import "hardhat-abi-exporter";
 import "hardhat-etherscan-abi";
 import "hardhat-change-network";
-import "@tenderly/hardhat-tenderly";
+// import "@tenderly/hardhat-tenderly";
 
 import { task } from "hardhat/config";
+
+require("solidity-coverage");
 
 dotenv.config();
 
@@ -80,10 +81,6 @@ const config: HardhatUserConfig = {
     flat: true,
     spacing: 2,
     pretty: true,
-  },
-  tenderly: {
-    project: "DAP",
-    username: "piotrostr",
   },
 };
 

@@ -3,6 +3,7 @@ import { ethers, waffle } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 import { DegenerateApeParty } from "../typechain";
+import { parseEther } from "ethers/lib/utils";
 
 const { provider } = waffle;
 
@@ -37,11 +38,11 @@ describe("DegenerateApeParty - base", () => {
       expect(symbol).to.equal("DAP");
     });
 
-    it("should have total supply of one million", async () => {
-      const oneMillion = BigNumber.from(10).pow(
-        6 + (await contract.decimals()),
+    it("should have total supply of ten million", async () => {
+      const tenMillion = BigNumber.from(10).pow(
+        7 + (await contract.decimals()),
       );
-      expect(await contract.totalSupply()).to.equal(oneMillion);
+      expect(await contract.totalSupply()).to.equal(tenMillion);
     });
   });
 
@@ -110,5 +111,14 @@ describe("DegenerateApeParty - base", () => {
       await set.wait();
       expect(await contract.partyWallet()).to.equal(partyWallet);
     });
+  });
+
+  it("can disable/enable trading", async () => {
+    const toggleTradingTx = await contract.toggleTrading();
+    await toggleTradingTx.wait();
+    expect(await contract.tradingEnabled()).to.equal(false);
+    await expect(
+      contract.transfer(await signers[3].getAddress(), parseEther("2")),
+    ).to.be.reverted;
   });
 });
