@@ -35,13 +35,10 @@ export interface DegenerateApePartyInterface extends utils.Interface {
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "pair()": FunctionFragment;
-    "partyFee()": FunctionFragment;
-    "partyWallet()": FunctionFragment;
     "poolFee()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "router()": FunctionFragment;
     "setMarketingWallet(address)": FunctionFragment;
-    "setPartyWallet(address)": FunctionFragment;
     "swapDapForEth(uint256)": FunctionFragment;
     "symbol()": FunctionFragment;
     "toggleFees()": FunctionFragment;
@@ -96,11 +93,6 @@ export interface DegenerateApePartyInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "pair", values?: undefined): string;
-  encodeFunctionData(functionFragment: "partyFee", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "partyWallet",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "poolFee", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -109,10 +101,6 @@ export interface DegenerateApePartyInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "router", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setMarketingWallet",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setPartyWallet",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -186,11 +174,6 @@ export interface DegenerateApePartyInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pair", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "partyFee", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "partyWallet",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "poolFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
@@ -199,10 +182,6 @@ export interface DegenerateApePartyInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setMarketingWallet",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setPartyWallet",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -354,10 +333,6 @@ export interface DegenerateApeParty extends BaseContract {
 
     pair(overrides?: CallOverrides): Promise<[string]>;
 
-    partyFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    partyWallet(overrides?: CallOverrides): Promise<[string]>;
-
     poolFee(overrides?: CallOverrides): Promise<[number]>;
 
     renounceOwnership(
@@ -367,11 +342,6 @@ export interface DegenerateApeParty extends BaseContract {
     router(overrides?: CallOverrides): Promise<[string]>;
 
     setMarketingWallet(
-      newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setPartyWallet(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -468,10 +438,6 @@ export interface DegenerateApeParty extends BaseContract {
 
   pair(overrides?: CallOverrides): Promise<string>;
 
-  partyFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  partyWallet(overrides?: CallOverrides): Promise<string>;
-
   poolFee(overrides?: CallOverrides): Promise<number>;
 
   renounceOwnership(
@@ -481,11 +447,6 @@ export interface DegenerateApeParty extends BaseContract {
   router(overrides?: CallOverrides): Promise<string>;
 
   setMarketingWallet(
-    newAddress: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setPartyWallet(
     newAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -588,10 +549,6 @@ export interface DegenerateApeParty extends BaseContract {
 
     pair(overrides?: CallOverrides): Promise<string>;
 
-    partyFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    partyWallet(overrides?: CallOverrides): Promise<string>;
-
     poolFee(overrides?: CallOverrides): Promise<number>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -599,11 +556,6 @@ export interface DegenerateApeParty extends BaseContract {
     router(overrides?: CallOverrides): Promise<string>;
 
     setMarketingWallet(
-      newAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setPartyWallet(
       newAddress: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -737,10 +689,6 @@ export interface DegenerateApeParty extends BaseContract {
 
     pair(overrides?: CallOverrides): Promise<BigNumber>;
 
-    partyFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    partyWallet(overrides?: CallOverrides): Promise<BigNumber>;
-
     poolFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
@@ -750,11 +698,6 @@ export interface DegenerateApeParty extends BaseContract {
     router(overrides?: CallOverrides): Promise<BigNumber>;
 
     setMarketingWallet(
-      newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setPartyWallet(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -855,10 +798,6 @@ export interface DegenerateApeParty extends BaseContract {
 
     pair(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    partyFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    partyWallet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     poolFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
@@ -868,11 +807,6 @@ export interface DegenerateApeParty extends BaseContract {
     router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setMarketingWallet(
-      newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setPartyWallet(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

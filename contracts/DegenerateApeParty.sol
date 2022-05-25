@@ -26,10 +26,8 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     uint256 private _totalSupply = 10**25;
 
     address public marketingWallet;
-    address public partyWallet;
 
     uint256 public marketingFee = 8;
-    uint256 public partyFee = 10;
     uint256 public liquidityFee = 1; // is actually 2%, as another 1% swaps into eth
 
     bool public elevatedFees = false;
@@ -46,7 +44,6 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
     constructor(address _routerAddress) {
         _mint(owner(), _totalSupply);
         marketingWallet = owner();
-        partyWallet = owner();
 
         router = IPancakeRouter02(_routerAddress);
         factory = IPancakeFactory(router.factory());
@@ -63,19 +60,13 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         marketingWallet = newAddress;
     }
 
-    function setPartyWallet(address newAddress) public onlyOwner {
-        partyWallet = newAddress;
-    }
-
     function toggleFees() public onlyOwner {
         elevatedFees = !elevatedFees;
         if (elevatedFees == true) {
             marketingFee = 99;
-            partyFee = 0;
             liquidityFee = 0;
         } else {
             marketingFee = 8;
-            partyFee = 10;
             liquidityFee = 1;
         }
     }
@@ -89,7 +80,7 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
         if (msg.sender == owner() || msg.sender == address(router)) {
             super._transfer(from, to, amount);
         } else {
-            uint256 totalFee = marketingFee.add(partyFee).add(liquidityFee);
+            uint256 totalFee = marketingFee.add(liquidityFee);
             uint256 dapToSwap = amount.mul(totalFee).div(100);
             uint256 amountPostFee = amount.sub(dapToSwap);
 
@@ -101,16 +92,11 @@ contract DegenerateApeParty is ERC20("DegenerateApeParty", "DAP"), Ownable {
             amountPostFee = amountPostFee.add(dapToSwap.sub(dapOut));
 
             uint256 marketingEth = ethOut.mul(marketingFee).div(totalFee);
-            uint256 partyEth = ethOut.mul(partyFee).div(totalFee);
             uint256 liquidityEth = ethOut.mul(liquidityFee).div(totalFee);
             uint256 liquidityDap = amount.div(100);
 
             // marketing fee is never 0
             payable(marketingWallet).transfer(marketingEth);
-
-            if (partyFee != 0) {
-                payable(partyWallet).transfer(partyEth);
-            }
 
             if (liquidityFee != 0) {
                 addLiquidity(liquidityDap, liquidityEth);

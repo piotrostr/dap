@@ -112,18 +112,13 @@ describe("DegenerateApeParty - fees", () => {
 
   describe("fees", () => {
     let marketingWallet: string;
-    let partyWallet: string;
 
     const setAndGetWallets = async () => {
       const txs = await Promise.all([
         contract.setMarketingWallet(signers[6].address),
-        contract.setPartyWallet(signers[7].address),
       ]);
       await Promise.all(txs.map(tx => tx.wait()));
-      return await Promise.all([
-        contract.marketingWallet(),
-        contract.partyWallet(),
-      ]);
+      return await Promise.all([contract.marketingWallet()]);
     };
 
     const checkIfTakesRightFee = async (
@@ -157,7 +152,7 @@ describe("DegenerateApeParty - fees", () => {
     };
 
     beforeEach(async () => {
-      [marketingWallet, partyWallet] = await setAndGetWallets();
+      [marketingWallet] = await setAndGetWallets();
     });
 
     it("owner is excluded from the fees", async () => {
@@ -175,11 +170,6 @@ describe("DegenerateApeParty - fees", () => {
     it("takes the 8% marketing fee", async () => {
       const feeAmount = BigNumber.from("8").mul(BigNumber.from("100"));
       await checkIfTakesRightFee(marketingWallet, feeAmount);
-    });
-
-    it("takes the 10% party fee", async () => {
-      const feeAmount = BigNumber.from("10").div(BigNumber.from("100"));
-      await checkIfTakesRightFee(partyWallet, feeAmount);
     });
 
     it("takes the 2% autoliquidity fee and adds liquidity", async () => {
@@ -213,11 +203,10 @@ describe("DegenerateApeParty - fees", () => {
         expect(elevatedFees1).to.be.true;
       });
 
-      it("toggling fees sets them to right amounts (99% 0% 0% and 8% 10% 1%)", async () => {
+      it("toggling fees sets them to right amounts (99% and 8%)", async () => {
         const elevatedFees0 = await contract.elevatedFees();
         expect(elevatedFees0).to.be.false;
         expect(await contract.marketingFee()).to.equal(BigNumber.from("8"));
-        expect(await contract.partyFee()).to.equal(BigNumber.from("10"));
         expect(await contract.liquidityFee()).to.equal(BigNumber.from("1"));
 
         const toggle1 = await contract.toggleFees();
@@ -225,7 +214,6 @@ describe("DegenerateApeParty - fees", () => {
         const elevatedFees1 = await contract.elevatedFees();
         expect(elevatedFees1).to.be.true;
         expect(await contract.marketingFee()).to.equal(BigNumber.from("99"));
-        expect(await contract.partyFee()).to.equal(BigNumber.from("0"));
         expect(await contract.liquidityFee()).to.equal(BigNumber.from("0"));
 
         const toggle2 = await contract.toggleFees();
@@ -233,7 +221,6 @@ describe("DegenerateApeParty - fees", () => {
         const elevatedFees2 = await contract.elevatedFees();
         expect(elevatedFees2).to.be.false;
         expect(await contract.marketingFee()).to.equal(BigNumber.from("8"));
-        expect(await contract.partyFee()).to.equal(BigNumber.from("10"));
         expect(await contract.liquidityFee()).to.equal(BigNumber.from("1"));
       });
 
