@@ -25,7 +25,7 @@ task("accounts", "lists accounts", async (_, { ethers }) => {
   }
 });
 
-const accounts = { mnemonic: process.env.MNEMONIC || "" };
+const accounts = [process.env.PRIVATE_KEY || ""];
 
 const config: HardhatUserConfig = {
   solidity: {
