@@ -3,6 +3,7 @@ on: ["push", "pull_request"]
 
 env:
   MORALIS_KEY: ${{ secrets.MORALIS_KEY }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
 jobs:
   test:
