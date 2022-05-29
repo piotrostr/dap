@@ -35,5 +35,5 @@ toggle for the first 48 hours 5% buy 15% sell
 ```
 
 Deployed on 29/05/2022 to address
-[0x4ceBF85Df1BA886aB20c0Cf8B1D1dbE4B492BD14](https://bscscan.com/address/0x4ceBF85Df1BA886aB20c0Cf8B1D1dbE4B492BD14#code)
+[0x4c...D14](https://bscscan.com/address/0x4ceBF85Df1BA886aB20c0Cf8B1D1dbE4B492BD14#code)
 onto Binance Smart Chain
